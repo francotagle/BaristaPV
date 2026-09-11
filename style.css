@@ -1577,6 +1577,16 @@ select option {
     }
 
 
+    .mobile-logo {
+
+        max-height: 32px;
+
+        max-width: 150px;
+
+        object-fit: contain;
+    }
+
+
     /* MENÚ CAJÓN (oculto por defecto, se desliza al abrir) */
 
     .sidebar-menu {
