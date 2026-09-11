@@ -1787,6 +1787,80 @@ select option {
         max-width: 95%;
     }
 
+
+    /* TABLA PRODUCTOS: solo Producto, Stock y Estado.
+       Categoría, Unidad, Mínimo, Costo y Acciones se ocultan
+       y se ven al tocar la fila (modal de detalle) */
+
+    .product-table-panel table {
+
+        min-width: 0;
+    }
+
+
+    .product-table-panel th:nth-child(2),
+    .product-table-panel td:nth-child(2),
+    .product-table-panel th:nth-child(3),
+    .product-table-panel td:nth-child(3),
+    .product-table-panel th:nth-child(5),
+    .product-table-panel td:nth-child(5),
+    .product-table-panel th:nth-child(6),
+    .product-table-panel td:nth-child(6),
+    .product-table-panel th:nth-child(8),
+    .product-table-panel td:nth-child(8) {
+
+        display: none;
+    }
+
+
+    #productos-tabla tr {
+
+        cursor: pointer;
+    }
+
+
+    /* MODAL DETALLE PRODUCTO */
+
+    .detalle-producto-body {
+
+        padding: 4px 0 6px;
+    }
+
+
+    .detalle-row {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: center;
+
+        padding: 11px 0;
+
+        border-bottom:
+            1px solid var(--borde);
+
+        font-size: 14px;
+    }
+
+
+    .detalle-row:last-child {
+
+        border-bottom: none;
+    }
+
+
+    .detalle-row span {
+
+        color: var(--texto-secundario);
+    }
+
+
+    .detalle-row strong {
+
+        color: white;
+    }
+
 }
 
 

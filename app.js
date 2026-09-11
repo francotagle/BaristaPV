@@ -662,6 +662,9 @@ async function cargarProductos() {
             document.createElement("tr");
 
 
+        fila.dataset.id = producto.id;
+
+
         fila.innerHTML = `
 
             <td>

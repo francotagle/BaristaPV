@@ -1070,6 +1070,120 @@
 
 
     <!-- ========================================
+         MODAL DETALLE PRODUCTO (mobile)
+    ========================================= -->
+
+    <div
+        id="modal-detalle-producto"
+        class="modal hidden"
+    >
+
+
+        <div class="modal-box">
+
+
+            <div class="modal-header">
+
+
+                <div>
+
+                    <h2 id="detalle-producto-nombre">
+                        Producto
+                    </h2>
+
+                    <p>
+                        Detalle del producto
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-close="modal-detalle-producto"
+                >
+                    ×
+                </button>
+
+
+            </div>
+
+
+
+            <div class="detalle-producto-body">
+
+                <div class="detalle-row">
+                    <span>Categoría</span>
+                    <strong id="detalle-categoria"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Unidad</span>
+                    <strong id="detalle-unidad"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Stock actual</span>
+                    <strong id="detalle-stock"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Stock mínimo</span>
+                    <strong id="detalle-minimo"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Costo unitario</span>
+                    <strong id="detalle-costo"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Estado</span>
+                    <strong id="detalle-estado"></strong>
+                </div>
+
+            </div>
+
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    data-close="modal-detalle-producto"
+                >
+                    Cerrar
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-edit btn-action"
+                    id="detalle-editar-btn"
+                >
+                    Editar
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-delete btn-action"
+                    id="detalle-desactivar-btn"
+                >
+                    Desactivar
+                </button>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ========================================
          SUPABASE
     ========================================= -->
 
@@ -1134,6 +1248,76 @@
             ubicarTopbarUser(mq);
 
             mq.addEventListener('change', ubicarTopbarUser);
+
+
+            // Tocar una fila de productos abre el detalle completo (mobile)
+
+            var tablaProductos = document.getElementById('productos-tabla');
+            var modalDetalle = document.getElementById('modal-detalle-producto');
+
+            if (tablaProductos && modalDetalle) {
+
+                tablaProductos.addEventListener('click', function (e) {
+
+                    if (!mq.matches) {
+                        return;
+                    }
+
+                    var fila = e.target.closest('tr');
+
+                    if (!fila || !fila.dataset.id) {
+                        return;
+                    }
+
+                    var celdas = fila.querySelectorAll('td');
+
+                    if (celdas.length < 8) {
+                        return;
+                    }
+
+                    document.getElementById('detalle-producto-nombre').textContent =
+                        celdas[0].textContent.trim();
+
+                    document.getElementById('detalle-categoria').textContent =
+                        celdas[1].textContent.trim();
+
+                    document.getElementById('detalle-unidad').textContent =
+                        celdas[2].textContent.trim();
+
+                    document.getElementById('detalle-stock').textContent =
+                        celdas[3].textContent.trim();
+
+                    document.getElementById('detalle-minimo').textContent =
+                        celdas[4].textContent.trim();
+
+                    document.getElementById('detalle-costo').textContent =
+                        celdas[5].textContent.trim();
+
+                    document.getElementById('detalle-estado').textContent =
+                        celdas[6].textContent.trim();
+
+                    var id = fila.dataset.id;
+
+                    var btnEditar = document.getElementById('detalle-editar-btn');
+                    var btnDesactivar = document.getElementById('detalle-desactivar-btn');
+
+                    if (btnEditar) {
+                        btnEditar.onclick = function () {
+                            modalDetalle.classList.add('hidden');
+                            editarProducto(id);
+                        };
+                    }
+
+                    if (btnDesactivar) {
+                        btnDesactivar.onclick = function () {
+                            modalDetalle.classList.add('hidden');
+                            desactivarProducto(id);
+                        };
+                    }
+
+                    modalDetalle.classList.remove('hidden');
+                });
+            }
 
         })();
     </script>
