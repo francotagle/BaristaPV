@@ -1488,6 +1488,22 @@ select option {
 }
 
 
+/* Barra superior mobile: oculta en desktop */
+
+.mobile-topbar {
+
+    display: none;
+}
+
+
+/* Overlay para cerrar el menú al tocar afuera */
+
+.sidebar-overlay {
+
+    display: none;
+}
+
+
 @media (max-width: 700px) {
 
     .sidebar {
@@ -1497,6 +1513,137 @@ select option {
         width: 100%;
 
         min-height: auto;
+    }
+
+
+    .sidebar-header {
+
+        display: none;
+    }
+
+
+    /* BARRA SUPERIOR MOBILE: hamburguesa + título + usuario */
+
+    .mobile-topbar {
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: space-between;
+
+        padding: 14px 16px;
+
+        background: #111111;
+
+        border-bottom:
+            1px solid var(--borde);
+    }
+
+
+    .mobile-menu-btn,
+    .mobile-user-btn {
+
+        width: auto;
+
+        background: transparent;
+
+        color: var(--texto);
+
+        font-size: 20px;
+
+        padding: 4px 8px;
+
+        border-radius: 6px;
+    }
+
+
+    .mobile-menu-btn:hover,
+    .mobile-user-btn:hover {
+
+        background: var(--negro-hover);
+    }
+
+
+    .mobile-title {
+
+        font-weight: 700;
+
+        letter-spacing: 0.5px;
+
+        color: white;
+
+        font-size: 15px;
+    }
+
+
+    /* MENÚ CAJÓN (oculto por defecto, se desliza al abrir) */
+
+    .sidebar-menu {
+
+        position: fixed;
+
+        top: 0;
+
+        left: 0;
+
+        bottom: 0;
+
+        width: 230px;
+
+        padding: 70px 12px 18px;
+
+        background:
+            linear-gradient(
+                180deg,
+                #111111 0%,
+                #090909 100%
+            );
+
+        border-right:
+            1px solid var(--borde);
+
+        transform: translateX(-100%);
+
+        transition: transform 0.25s ease;
+
+        z-index: 300;
+
+        overflow-y: auto;
+    }
+
+
+    .sidebar.menu-open .sidebar-menu {
+
+        transform: translateX(0);
+    }
+
+
+    .sidebar-overlay {
+
+        display: block;
+
+        position: fixed;
+
+        inset: 0;
+
+        background: rgba(0, 0, 0, 0.6);
+
+        opacity: 0;
+
+        pointer-events: none;
+
+        transition: opacity 0.2s ease;
+
+        z-index: 250;
+    }
+
+
+    .sidebar-overlay.visible {
+
+        opacity: 1;
+
+        pointer-events: auto;
     }
 
 
@@ -1516,28 +1663,70 @@ select option {
     }
 
 
+    /* Título repetido: ya está en la barra mobile */
+
+    .dashboard-header h1 {
+
+        display: none;
+    }
+
+
+    .topbar > div:first-child {
+
+        display: none;
+    }
+
+
     .topbar {
 
-        flex-direction: column;
+        justify-content: flex-end;
 
-        align-items: flex-start;
+        padding-bottom: 14px;
 
-        gap: 18px;
+        margin-bottom: 20px;
     }
 
 
     .topbar-user {
 
-        width: 100%;
-
-        justify-content: space-between;
+        width: auto;
     }
 
+
+    /* TARJETAS: 2 columnas, "Stock bajo" ocupa todo el ancho */
 
     .cards {
 
         grid-template-columns:
-            1fr;
+            repeat(2, 1fr);
+
+        gap: 12px;
+    }
+
+
+    #card-stock-bajo {
+
+        grid-column: 1 / -1;
+    }
+
+
+    .card {
+
+        padding: 16px;
+
+        min-height: 100px;
+    }
+
+
+    .card h3 {
+
+        font-size: 11px;
+    }
+
+
+    .card .number {
+
+        font-size: 24px;
     }
 
 
