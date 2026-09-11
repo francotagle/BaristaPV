@@ -1645,7 +1645,7 @@ select option {
 
         transition: opacity 0.2s ease;
 
-        z-index: 250;
+        z-index: 90;
     }
 
 
