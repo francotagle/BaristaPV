@@ -1109,6 +1109,32 @@
                 });
             }
 
+
+            // Mover "Encargado / Cerrar sesión" al fondo del menú
+            // en mobile, y de vuelta al topbar en desktop
+
+            var mq = window.matchMedia('(max-width: 700px)');
+            var topbarUser = document.querySelector('.topbar-user');
+            var sidebarMenu = document.querySelector('.sidebar-menu');
+            var topbar = document.querySelector('.topbar');
+
+            function ubicarTopbarUser(e) {
+
+                if (!topbarUser || !sidebarMenu || !topbar) {
+                    return;
+                }
+
+                if (e.matches) {
+                    sidebarMenu.appendChild(topbarUser);
+                } else {
+                    topbar.appendChild(topbarUser);
+                }
+            }
+
+            ubicarTopbarUser(mq);
+
+            mq.addEventListener('change', ubicarTopbarUser);
+
         })();
     </script>
 

@@ -1681,25 +1681,59 @@ select option {
     }
 
 
-    .topbar > div:first-child {
+    .sidebar-menu {
+
+        display: flex;
+
+        flex-direction: column;
+    }
+
+
+    /* Se oculta: el título y el usuario ahora viven en la barra
+       mobile de arriba y al fondo del menú lateral */
+
+    .topbar {
 
         display: none;
     }
 
 
-    .topbar {
+    /* ENCARGADO + CERRAR SESIÓN: al fondo del cajón del menú */
 
-        justify-content: flex-end;
+    .sidebar-menu .topbar-user {
 
-        padding-bottom: 14px;
+        margin-top: auto;
 
-        margin-bottom: 20px;
+        flex-direction: column;
+
+        align-items: stretch;
+
+        gap: 10px;
+
+        padding-top: 16px;
+
+        margin-bottom: 0;
+
+        border-top:
+            1px solid var(--borde);
     }
 
 
-    .topbar-user {
+    .sidebar-menu .encargado {
 
-        width: auto;
+        padding-right: 0;
+
+        border-right: none;
+
+        text-align: left;
+    }
+
+
+    .sidebar-menu #logout-btn {
+
+        width: 100%;
+
+        justify-content: center;
     }
 
 
