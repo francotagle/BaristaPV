@@ -1,0 +1,1055 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Barista Caffe - Inventario</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <div class="dashboard">
+
+
+        <!-- ========================================
+             SIDEBAR
+        ========================================= -->
+
+        <aside class="sidebar">
+
+
+            <!-- ESPACIO PARA LOGO BARISTA -->
+
+     <div class="sidebar-header">
+
+    <img
+        src="/imagen/BaristaLogo.png"
+        alt="Barista Caffe"
+        class="logo-barista"
+    >
+
+</div>
+
+
+            <!-- MENÚ -->
+
+            <nav class="sidebar-menu">
+
+
+                <button
+                    class="menu-item active"
+                    data-section="inicio"
+                >
+                    Inicio
+                </button>
+
+
+                <button
+                    class="menu-item"
+                    data-section="productos"
+                >
+                    Productos
+                </button>
+
+
+                <button
+                    class="menu-item"
+                    data-section="entradas"
+                >
+                    Entradas
+                </button>
+
+
+                <button
+                    class="menu-item"
+                    data-section="salidas"
+                >
+                    Salidas
+                </button>
+
+
+                <button
+                    class="menu-item"
+                    data-section="mermas"
+                >
+                    Mermas
+                </button>
+
+
+                <button
+                    class="menu-item"
+                    data-section="reportes"
+                >
+                    Reportes
+                </button>
+
+
+            </nav>
+
+
+        </aside>
+
+
+
+        <!-- ========================================
+             CONTENIDO PRINCIPAL
+        ========================================= -->
+
+        <main class="main-content">
+
+
+            <!-- ====================================
+                 TOPBAR
+            ===================================== -->
+
+            <header class="topbar">
+
+
+                <div>
+
+                    <h1>
+                        BARISTA CAFFE
+                    </h1>
+
+                    <p>
+                        Control de inventario
+                    </p>
+
+                </div>
+
+
+                <!-- USUARIO + CERRAR SESIÓN -->
+
+                <div class="topbar-user">
+
+
+                    <span class="encargado">
+                        Encargado
+                    </span>
+
+
+                    <button id="logout-btn">
+                        Cerrar sesión
+                    </button>
+
+
+                </div>
+
+
+            </header>
+
+
+
+            <!-- ========================================
+                 INICIO / DASHBOARD
+            ========================================= -->
+
+            <section
+                id="section-inicio"
+                class="dashboard-section"
+            >
+
+
+                <div class="dashboard-header">
+
+                    <h1>
+                        BARISTA CAFFE
+                    </h1>
+
+                    <p>
+                        Resumen general del inventario
+                    </p>
+
+                </div>
+
+
+
+                <!-- TARJETAS -->
+
+                <div class="cards">
+
+
+                    <!-- ENTRADAS -->
+
+                    <div class="card">
+
+                        <h3>
+                            Entradas
+                        </h3>
+
+                        <div
+                            class="number"
+                            id="total-entradas"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- PRODUCTOS -->
+
+                    <div class="card">
+
+                        <h3>
+                            Productos
+                        </h3>
+
+                        <div
+                            class="number"
+                            id="total-productos"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+
+
+                    <!-- STOCK BAJO -->
+
+<div
+    class="card card-stock-bajo"
+    id="card-stock-bajo"
+    title="Ver productos con stock bajo"
+>
+
+    <h3>
+        Stock bajo
+    </h3>
+
+    <div
+        class="number red"
+        id="total-stock-bajo"
+    >
+        0
+    </div>
+
+    <p class="card-link">
+        Ver productos →
+    </p>
+
+</div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ========================================
+                 PRODUCTOS
+            ========================================= -->
+
+            <section
+                id="section-productos"
+                class="dashboard-section section-hidden"
+            >
+
+
+                <div class="section-header">
+
+
+                    <h2>
+                        Productos
+                    </h2>
+
+
+                    <button
+                        id="btn-nuevo-producto"
+                        class="btn-primary"
+                    >
+                        Nuevo producto
+                    </button>
+
+
+                </div>
+
+
+
+                <!-- BUSCADOR -->
+
+                <div class="product-toolbar">
+
+                    <input
+                        type="text"
+                        id="buscar-producto"
+                        placeholder="Buscar producto..."
+                    >
+
+                </div>
+
+
+
+                <!-- TABLA -->
+
+                <div class="panel product-table-panel">
+
+
+                    <div class="table-container">
+
+
+                        <table>
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Producto
+                                    </th>
+
+                                    <th>
+                                        Categoría
+                                    </th>
+
+                                    <th>
+                                        Unidad
+                                    </th>
+
+                                    <th>
+                                        Stock
+                                    </th>
+
+                                    <th>
+                                        Mínimo
+                                    </th>
+
+                                    <th>
+                                        Costo
+                                    </th>
+
+                                    <th>
+                                        Estado
+                                    </th>
+
+                                    <th>
+                                        Acciones
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="productos-tabla">
+
+                                <!-- Productos cargados por JavaScript -->
+
+                            </tbody>
+
+
+                        </table>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ========================================
+                 ENTRADAS
+            ========================================= -->
+
+            <section
+                id="section-entradas"
+                class="dashboard-section section-hidden"
+            >
+
+
+                <div class="section-header">
+
+
+                    <h2>
+                        Entradas
+                    </h2>
+
+
+                    <button
+                        id="btn-nueva-entrada"
+                        class="btn-primary"
+                    >
+                        Nueva entrada
+                    </button>
+
+
+                </div>
+
+
+
+                <div class="panel">
+
+
+                    <div class="table-container">
+
+
+                        <table>
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Fecha
+                                    </th>
+
+                                    <th>
+                                        Producto
+                                    </th>
+
+                                    <th>
+                                        Cantidad
+                                    </th>
+
+                                    <th>
+                                        Proveedor
+                                    </th>
+
+                                    <th>
+                                        Documento
+                                    </th>
+
+                                    <th>
+                                        Observación
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="entradas-tabla">
+
+                                <!-- Entradas cargadas por JavaScript -->
+
+                            </tbody>
+
+
+                        </table>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ========================================
+                 SALIDAS
+            ========================================= -->
+
+            <section
+                id="section-salidas"
+                class="dashboard-section section-hidden"
+            >
+
+
+                <div class="section-header">
+
+                    <h2>
+                        Salidas
+                    </h2>
+
+                </div>
+
+
+                <div class="panel">
+
+
+                    <div class="panel-header">
+
+                        <h2>
+                            Registro de salidas
+                        </h2>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+
+                        <table>
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Fecha
+                                    </th>
+
+                                    <th>
+                                        Producto
+                                    </th>
+
+                                    <th>
+                                        Cantidad
+                                    </th>
+
+                                    <th>
+                                        Motivo
+                                    </th>
+
+                                    <th>
+                                        Área
+                                    </th>
+
+                                    <th>
+                                        Observación
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                <tr>
+
+                                    <td
+                                        colspan="6"
+                                        class="empty"
+                                    >
+                                        No hay salidas registradas.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+
+                        </table>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ========================================
+                 MERMAS
+            ========================================= -->
+
+            <section
+                id="section-mermas"
+                class="dashboard-section section-hidden"
+            >
+
+
+                <div class="section-header">
+
+                    <h2>
+                        Mermas
+                    </h2>
+
+                </div>
+
+
+                <div class="panel">
+
+
+                    <div class="panel-header">
+
+                        <h2>
+                            Registro de mermas
+                        </h2>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+
+                        <table>
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Fecha
+                                    </th>
+
+                                    <th>
+                                        Producto
+                                    </th>
+
+                                    <th>
+                                        Cantidad
+                                    </th>
+
+                                    <th>
+                                        Motivo
+                                    </th>
+
+                                    <th>
+                                        Observación
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                <tr>
+
+                                    <td
+                                        colspan="5"
+                                        class="empty"
+                                    >
+                                        No hay mermas registradas.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+
+                        </table>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+
+            <!-- ========================================
+                 REPORTES
+            ========================================= -->
+
+            <section
+                id="section-reportes"
+                class="dashboard-section section-hidden"
+            >
+
+
+                <div class="section-header">
+
+                    <h2>
+                        Reportes
+                    </h2>
+
+                </div>
+
+
+                <div class="panel">
+
+
+                    <div class="panel-header">
+
+                        <h2>
+                            Reportes de inventario
+                        </h2>
+
+                    </div>
+
+
+                    <div style="padding: 25px;">
+
+                        <p style="color: #888;">
+                            Los reportes estarán disponibles próximamente.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+
+
+    <!-- ========================================
+         MODAL PRODUCTO
+    ========================================= -->
+
+    <div
+        id="modal-producto"
+        class="modal hidden"
+    >
+
+
+        <div class="modal-box">
+
+
+            <div class="modal-header">
+
+
+                <div>
+
+                    <h2>
+                        Nuevo producto
+                    </h2>
+
+                    <p>
+                        Ingresa los datos del producto
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-close="modal-producto"
+                >
+                    ×
+                </button>
+
+
+            </div>
+
+
+
+            <form id="producto-form">
+
+
+                <input
+                    type="hidden"
+                    id="producto-id"
+                >
+
+
+                <label for="producto-nombre">
+                    Nombre del producto
+                </label>
+
+                <input
+                    type="text"
+                    id="producto-nombre"
+                    placeholder="Ej: Pisco Mistral"
+                    required
+                >
+
+
+
+                <label for="producto-categoria">
+                    Categoría
+                </label>
+
+                <select
+                    id="producto-categoria"
+                    required
+                >
+
+                    <option value="">
+                        Seleccionar categoría
+                    </option>
+
+                </select>
+
+
+
+                <label for="producto-unidad">
+                    Unidad
+                </label>
+
+                <input
+                    type="text"
+                    id="producto-unidad"
+                    placeholder="Ej: unidad, botella, lata"
+                    required
+                >
+
+
+
+                <label for="producto-stock">
+                    Stock actual
+                </label>
+
+                <input
+                    type="number"
+                    id="producto-stock"
+                    step="0.01"
+                    min="0"
+                    value="0"
+                    required
+                >
+
+
+
+                <label for="producto-minimo">
+                    Stock mínimo
+                </label>
+
+                <input
+                    type="number"
+                    id="producto-minimo"
+                    step="0.01"
+                    min="0"
+                    value="0"
+                    required
+                >
+
+
+
+                <label for="producto-costo">
+                    Costo unitario
+                </label>
+
+                <input
+                    type="number"
+                    id="producto-costo"
+                    step="0.01"
+                    min="0"
+                    value="0"
+                    required
+                >
+
+
+
+                <p id="producto-mensaje"></p>
+
+
+
+                <div class="modal-actions">
+
+
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        data-close="modal-producto"
+                    >
+                        Cancelar
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Guardar producto
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ========================================
+         MODAL ENTRADA
+    ========================================= -->
+
+    <div
+        id="modal-entrada"
+        class="modal hidden"
+    >
+
+
+        <div class="modal-box">
+
+
+            <div class="modal-header">
+
+
+                <div>
+
+                    <h2>
+                        Nueva entrada
+                    </h2>
+
+                    <p>
+                        Registra el ingreso de productos
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-close="modal-entrada"
+                >
+                    ×
+                </button>
+
+
+            </div>
+
+
+
+            <form id="entrada-form">
+
+
+                <label for="entrada-producto">
+                    Producto
+                </label>
+
+                <select
+                    id="entrada-producto"
+                    required
+                >
+
+                    <option value="">
+                        Seleccionar producto
+                    </option>
+
+                </select>
+
+
+
+                <label for="entrada-cantidad">
+                    Cantidad
+                </label>
+
+                <input
+                    type="number"
+                    id="entrada-cantidad"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="Ej: 10"
+                    required
+                >
+
+
+
+                <label for="entrada-proveedor">
+                    Proveedor
+                </label>
+
+                <input
+                    type="text"
+                    id="entrada-proveedor"
+                    placeholder="Nombre del proveedor"
+                >
+
+
+
+                <label for="entrada-documento">
+                    Documento
+                </label>
+
+                <input
+                    type="text"
+                    id="entrada-documento"
+                    placeholder="Factura, boleta, guía, etc."
+                >
+
+
+
+                <label for="entrada-observacion">
+                    Observación
+                </label>
+
+                <input
+                    type="text"
+                    id="entrada-observacion"
+                    placeholder="Observación opcional"
+                >
+
+
+
+                <p id="entrada-mensaje"></p>
+
+
+
+                <div class="modal-actions">
+
+
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        data-close="modal-entrada"
+                    >
+                        Cancelar
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Registrar entrada
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ========================================
+         SUPABASE
+    ========================================= -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <!-- JAVASCRIPT -->
+
+    <script src="app.js"></script>
+
+
+</body>
+
+</html>
+```
