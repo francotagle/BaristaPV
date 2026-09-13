@@ -1264,8 +1264,15 @@
             if (menuProductos && submenuProductos) {
 
                 menuProductos.addEventListener('click', function () {
-                    menuProductos.classList.toggle('submenu-open');
-                    submenuProductos.classList.toggle('open');
+
+                    var abierto = submenuProductos.classList.toggle('open');
+
+                    menuProductos.classList.toggle('submenu-open', abierto);
+
+                    submenuProductos.style.maxHeight =
+                        abierto
+                            ? submenuProductos.scrollHeight + 'px'
+                            : '0px';
                 });
 
                 (async function poblarSubmenuProductos() {

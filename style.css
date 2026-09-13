@@ -499,12 +499,6 @@ button:active {
 }
 
 
-.submenu.open {
-
-    max-height: 260px;
-}
-
-
 .submenu-item {
 
     width: 100%;
