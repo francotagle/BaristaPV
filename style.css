@@ -461,6 +461,80 @@ button:active {
 }
 
 
+/* DESPLEGABLE PRODUCTOS > CATEGORÍAS */
+
+.menu-group {
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+.menu-arrow {
+
+    margin-left: auto;
+
+    transition: transform 0.2s ease;
+}
+
+
+#menu-productos.submenu-open .menu-arrow {
+
+    transform: rotate(180deg);
+}
+
+
+.submenu {
+
+    display: flex;
+
+    flex-direction: column;
+
+    max-height: 0;
+
+    overflow: hidden;
+
+    transition: max-height 0.25s ease;
+}
+
+
+.submenu.open {
+
+    max-height: 260px;
+}
+
+
+.submenu-item {
+
+    width: 100%;
+
+    text-align: left;
+
+    background: transparent;
+
+    border: none;
+
+    color: var(--texto-secundario);
+
+    padding: 10px 14px 10px 34px;
+
+    font-size: 13px;
+
+    border-radius: 7px;
+
+    margin-bottom: 3px;
+}
+
+
+.submenu-item:hover {
+
+    background: var(--negro-hover);
+
+    color: white;
+}
+
+
 .menu-item.active::before {
 
     content: "";

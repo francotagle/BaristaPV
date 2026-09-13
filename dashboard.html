@@ -87,12 +87,23 @@
                 </button>
 
 
-                <button
-                    class="menu-item"
-                    data-section="productos"
-                >
-                    Productos
-                </button>
+                <div class="menu-group">
+
+                    <button
+                        class="menu-item"
+                        data-section="productos"
+                        id="menu-productos"
+                    >
+                        Productos
+                        <span class="menu-arrow">▾</span>
+                    </button>
+
+                    <div
+                        class="submenu"
+                        id="submenu-productos"
+                    ></div>
+
+                </div>
 
 
                 <button
@@ -1218,9 +1229,99 @@
 
                 overlay.addEventListener('click', closeMenu);
 
-                document.querySelectorAll('.menu-item').forEach(function (btn) {
+                document.querySelectorAll('.menu-item:not(#menu-productos)').forEach(function (btn) {
                     btn.addEventListener('click', closeMenu);
                 });
+            }
+
+
+            // Desplegable de categorías dentro de "Productos"
+
+            var menuProductos = document.getElementById('menu-productos');
+            var submenuProductos = document.getElementById('submenu-productos');
+
+            function mostrarSeccionProductos() {
+
+                document.querySelectorAll('.menu-item').forEach(function (item) {
+                    item.classList.remove('active');
+                });
+
+                if (menuProductos) {
+                    menuProductos.classList.add('active');
+                }
+
+                document.querySelectorAll('.dashboard-section').forEach(function (section) {
+                    section.classList.add('section-hidden');
+                });
+
+                var seccionProductos = document.getElementById('section-productos');
+
+                if (seccionProductos) {
+                    seccionProductos.classList.remove('section-hidden');
+                }
+            }
+
+            if (menuProductos && submenuProductos) {
+
+                menuProductos.addEventListener('click', function () {
+                    menuProductos.classList.toggle('submenu-open');
+                    submenuProductos.classList.toggle('open');
+                });
+
+                (async function poblarSubmenuProductos() {
+
+                    var nombres = [];
+
+                    try {
+
+                        var resultado = await supabaseClient
+                            .from('categorias')
+                            .select('nombre')
+                            .eq('activo', true)
+                            .order('nombre');
+
+                        if (!resultado.error && resultado.data) {
+                            nombres = resultado.data.map(function (c) {
+                                return c.nombre;
+                            });
+                        }
+
+                    } catch (err) {
+                        console.error('Error cargando categorías del menú:', err);
+                    }
+
+                    if (nombres.length === 0) {
+                        nombres = ['Cafetería', 'Destilados', 'Bebidas', 'Frutería'];
+                    }
+
+                    submenuProductos.innerHTML = '';
+
+                    nombres.forEach(function (nombre) {
+
+                        var boton = document.createElement('button');
+                        boton.type = 'button';
+                        boton.className = 'submenu-item';
+                        boton.dataset.categoria = nombre;
+                        boton.textContent = nombre;
+
+                        boton.addEventListener('click', function () {
+
+                            mostrarSeccionProductos();
+
+                            var buscador = document.getElementById('buscar-producto');
+
+                            if (buscador) {
+                                buscador.value = nombre;
+                                buscador.dispatchEvent(new Event('input'));
+                            }
+
+                            closeMenu();
+                        });
+
+                        submenuProductos.appendChild(boton);
+                    });
+
+                })();
             }
 
 
