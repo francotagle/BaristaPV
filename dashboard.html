@@ -124,9 +124,9 @@
 
                 <button
                     class="menu-item"
-                    data-section="mermas"
+                    data-section="facturas"
                 >
-                    Mermas
+                    Facturas
                 </button>
 
 
@@ -607,11 +607,11 @@
 
 
             <!-- ========================================
-                 MERMAS
+                 FACTURAS
             ========================================= -->
 
             <section
-                id="section-mermas"
+                id="section-facturas"
                 class="dashboard-section section-hidden"
             >
 
@@ -619,7 +619,7 @@
                 <div class="section-header">
 
                     <h2>
-                        Mermas
+                        Facturas
                     </h2>
 
                 </div>
@@ -631,8 +631,15 @@
                     <div class="panel-header">
 
                         <h2>
-                            Registro de mermas
+                            Registro de facturas
                         </h2>
+
+                        <button
+                            id="btn-nueva-factura"
+                            class="btn-primary"
+                        >
+                            + Nueva factura
+                        </button>
 
                     </div>
 
@@ -652,19 +659,19 @@
                                     </th>
 
                                     <th>
-                                        Producto
+                                        Nombre
                                     </th>
 
                                     <th>
-                                        Cantidad
+                                        RUT
                                     </th>
 
                                     <th>
-                                        Motivo
+                                        Total
                                     </th>
 
                                     <th>
-                                        Observación
+                                        Acciones
                                     </th>
 
                                 </tr>
@@ -672,7 +679,7 @@
                             </thead>
 
 
-                            <tbody>
+                            <tbody id="facturas-tabla">
 
                                 <tr>
 
@@ -680,7 +687,7 @@
                                         colspan="5"
                                         class="empty"
                                     >
-                                        No hay mermas registradas.
+                                        No hay facturas registradas.
                                     </td>
 
                                 </tr>
@@ -1071,6 +1078,316 @@
 
 
             </form>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ========================================
+         MODAL NUEVA FACTURA
+    ========================================= -->
+
+    <div
+        id="modal-factura"
+        class="modal hidden"
+    >
+
+
+        <div class="modal-box modal-box-ancho">
+
+
+            <div class="modal-header">
+
+
+                <div>
+
+                    <h2>
+                        Nueva factura
+                    </h2>
+
+                    <p>
+                        Datos del cliente y productos facturados
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-close="modal-factura"
+                >
+                    ×
+                </button>
+
+
+            </div>
+
+
+
+            <form id="factura-form">
+
+
+                <label for="factura-nombre">
+                    Nombre / Razón social
+                </label>
+
+                <input
+                    type="text"
+                    id="factura-nombre"
+                    placeholder="Nombre del cliente o empresa"
+                    required
+                >
+
+
+                <label for="factura-rut">
+                    RUT
+                </label>
+
+                <input
+                    type="text"
+                    id="factura-rut"
+                    placeholder="Ej: 12.345.678-9"
+                    required
+                >
+
+
+                <label for="factura-giro">
+                    Giro
+                </label>
+
+                <input
+                    type="text"
+                    id="factura-giro"
+                    placeholder="Actividad económica"
+                >
+
+
+                <label for="factura-tipo-giro">
+                    Tipo de giro
+                </label>
+
+                <input
+                    type="text"
+                    id="factura-tipo-giro"
+                    placeholder="Ej: Restaurante, Distribuidor, etc."
+                >
+
+
+                <label for="factura-direccion">
+                    Dirección
+                </label>
+
+                <input
+                    type="text"
+                    id="factura-direccion"
+                    placeholder="Calle y número"
+                >
+
+
+                <label for="factura-comuna">
+                    Comuna
+                </label>
+
+                <input
+                    type="text"
+                    id="factura-comuna"
+                >
+
+
+                <label for="factura-ciudad">
+                    Ciudad
+                </label>
+
+                <input
+                    type="text"
+                    id="factura-ciudad"
+                >
+
+
+                <label for="factura-contacto">
+                    Contacto
+                </label>
+
+                <input
+                    type="text"
+                    id="factura-contacto"
+                    placeholder="Nombre, teléfono o correo"
+                >
+
+
+
+                <div class="factura-detalle-header">
+
+                    <h3>
+                        Detalle de productos
+                    </h3>
+
+                    <button
+                        type="button"
+                        id="btn-agregar-detalle-factura"
+                        class="btn-secondary"
+                    >
+                        + Agregar producto
+                    </button>
+
+                </div>
+
+
+                <div id="factura-detalle-lista"></div>
+
+
+                <div class="factura-total-row">
+
+                    <span>
+                        Total
+                    </span>
+
+                    <strong id="factura-total">
+                        $0
+                    </strong>
+
+                </div>
+
+
+
+                <p id="factura-mensaje"></p>
+
+
+
+                <div class="modal-actions">
+
+
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        data-close="modal-factura"
+                    >
+                        Cancelar
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Guardar factura
+                    </button>
+
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ========================================
+         MODAL VER FACTURA
+    ========================================= -->
+
+    <div
+        id="modal-ver-factura"
+        class="modal hidden"
+    >
+
+
+        <div class="modal-box modal-box-ancho">
+
+
+            <div class="modal-header">
+
+
+                <div>
+
+                    <h2 id="ver-factura-nombre">
+                        Factura
+                    </h2>
+
+                    <p id="ver-factura-rut"></p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-close="modal-ver-factura"
+                >
+                    ×
+                </button>
+
+
+            </div>
+
+
+
+            <div class="detalle-producto-body">
+
+                <div class="detalle-row">
+                    <span>Giro</span>
+                    <strong id="ver-factura-giro"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Tipo de giro</span>
+                    <strong id="ver-factura-tipo-giro"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Dirección</span>
+                    <strong id="ver-factura-direccion"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Comuna</span>
+                    <strong id="ver-factura-comuna"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Ciudad</span>
+                    <strong id="ver-factura-ciudad"></strong>
+                </div>
+
+                <div class="detalle-row">
+                    <span>Contacto</span>
+                    <strong id="ver-factura-contacto"></strong>
+                </div>
+
+            </div>
+
+
+            <h3>Productos</h3>
+
+            <div id="ver-factura-productos"></div>
+
+            <div class="factura-total-row">
+                <span>Total</span>
+                <strong id="ver-factura-total">$0</strong>
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    data-close="modal-ver-factura"
+                >
+                    Cerrar
+                </button>
+
+            </div>
 
 
         </div>

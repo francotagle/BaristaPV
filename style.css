@@ -1267,6 +1267,122 @@ td strong {
 }
 
 
+.modal-box-ancho {
+
+    width: 640px;
+}
+
+
+/* FACTURAS: encabezado del detalle de productos */
+
+.factura-detalle-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-top: 18px;
+
+    margin-bottom: 10px;
+}
+
+
+.factura-detalle-header h3 {
+
+    font-size: 14px;
+
+    color: var(--texto-secundario);
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* FACTURAS: cada fila de producto / cantidad / valor */
+
+.factura-detalle-row {
+
+    display: grid;
+
+    grid-template-columns:
+        2fr 0.8fr 1fr 1fr auto;
+
+    gap: 8px;
+
+    align-items: center;
+
+    margin-bottom: 8px;
+}
+
+
+.factura-detalle-row select,
+.factura-detalle-row input {
+
+    width: 100%;
+}
+
+
+.factura-detalle-subtotal {
+
+    font-size: 13px;
+
+    color: var(--texto-secundario);
+
+    text-align: right;
+
+    white-space: nowrap;
+}
+
+
+.factura-detalle-quitar {
+
+    background: transparent;
+
+    border:
+        1px solid var(--borde);
+
+    color: var(--texto-secundario);
+
+    border-radius: 6px;
+
+    width: 30px;
+
+    height: 30px;
+
+    cursor: pointer;
+}
+
+
+.factura-detalle-quitar:hover {
+
+    background: var(--negro-hover);
+
+    color: white;
+}
+
+
+.factura-total-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 14px 0;
+
+    margin-top: 10px;
+
+    border-top:
+        1px solid var(--borde);
+
+    font-size: 16px;
+}
+
+
 /* ========================================
    SCROLLBAR MODAL
 ======================================== */
@@ -1927,6 +2043,39 @@ select option {
     .detalle-row strong {
 
         color: white;
+    }
+
+
+    /* FACTURAS: filas de producto apiladas en mobile */
+
+    .modal-box-ancho {
+
+        width: 100%;
+    }
+
+
+    .factura-detalle-row {
+
+        grid-template-columns: 1fr 1fr;
+
+        padding: 10px;
+
+        border:
+            1px solid var(--borde);
+
+        border-radius: 8px;
+    }
+
+
+    .factura-detalle-row select {
+
+        grid-column: 1 / -1;
+    }
+
+
+    .factura-detalle-subtotal {
+
+        text-align: left;
     }
 
 }

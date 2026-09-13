@@ -143,8 +143,8 @@ const sections = {
     salidas:
         document.getElementById("section-salidas"),
 
-    mermas:
-        document.getElementById("section-mermas"),
+    facturas:
+        document.getElementById("section-facturas"),
 
     reportes:
         document.getElementById("section-reportes")
@@ -190,6 +190,13 @@ menuItems.forEach(function(button) {
 
             cargarProductos();
             cargarCategorias();
+
+        }
+
+
+        if (sectionName === "facturas") {
+
+            cargarFacturas();
 
         }
 
@@ -1547,4 +1554,727 @@ if (cardStockBajo) {
 
         }
     );
+}
+
+// ========================================
+// FACTURAS
+// ========================================
+
+const btnNuevaFactura =
+    document.getElementById("btn-nueva-factura");
+
+const modalFactura =
+    document.getElementById("modal-factura");
+
+const facturaForm =
+    document.getElementById("factura-form");
+
+const facturaDetalleLista =
+    document.getElementById("factura-detalle-lista");
+
+const modalVerFactura =
+    document.getElementById("modal-ver-factura");
+
+
+let productosParaFactura = [];
+
+
+// Trae los productos activos (una vez) para llenar
+// los selects del detalle de la factura
+
+async function obtenerProductosParaFactura() {
+
+    const { data, error } =
+        await supabaseClient
+            .from("productos")
+            .select("id, nombre, costo_unitario")
+            .eq("activo", true)
+            .order("nombre");
+
+    if (error) {
+
+        console.error(
+            "Error cargando productos para factura:",
+            error
+        );
+
+        productosParaFactura = [];
+        return;
+    }
+
+    productosParaFactura = data || [];
+}
+
+
+// Crea una fila de detalle (producto / cantidad / valor)
+
+function crearFilaDetalleFactura() {
+
+    const fila =
+        document.createElement("div");
+
+    fila.className = "factura-detalle-row";
+
+
+    let opciones = `
+        <option value="">
+            Seleccionar producto
+        </option>
+    `;
+
+    productosParaFactura.forEach(function(producto) {
+
+        opciones += `
+            <option
+                value="${producto.id}"
+                data-costo="${producto.costo_unitario || 0}"
+            >
+                ${producto.nombre}
+            </option>
+        `;
+
+    });
+
+
+    fila.innerHTML = `
+
+        <select class="factura-detalle-producto">
+            ${opciones}
+        </select>
+
+        <input
+            type="number"
+            class="factura-detalle-cantidad"
+            min="0.01"
+            step="0.01"
+            placeholder="Cant."
+        >
+
+        <input
+            type="number"
+            class="factura-detalle-valor"
+            min="0"
+            step="1"
+            placeholder="Valor unit."
+        >
+
+        <span class="factura-detalle-subtotal">
+            $0
+        </span>
+
+        <button
+            type="button"
+            class="factura-detalle-quitar"
+        >
+            ×
+        </button>
+
+    `;
+
+
+    const select =
+        fila.querySelector(
+            ".factura-detalle-producto"
+        );
+
+    const inputCantidad =
+        fila.querySelector(
+            ".factura-detalle-cantidad"
+        );
+
+    const inputValor =
+        fila.querySelector(
+            ".factura-detalle-valor"
+        );
+
+
+    // Al elegir un producto, sugiere su costo como valor unitario
+
+    select.addEventListener("change", function() {
+
+        const opcionElegida =
+            select.selectedOptions[0];
+
+        const costo =
+            opcionElegida
+                ? opcionElegida.dataset.costo
+                : "";
+
+        if (costo && !inputValor.value) {
+
+            inputValor.value = costo;
+        }
+
+        recalcularTotalFactura();
+    });
+
+
+    inputCantidad.addEventListener(
+        "input", recalcularTotalFactura
+    );
+
+    inputValor.addEventListener(
+        "input", recalcularTotalFactura
+    );
+
+
+    fila.querySelector(
+        ".factura-detalle-quitar"
+    ).addEventListener("click", function() {
+
+        fila.remove();
+        recalcularTotalFactura();
+    });
+
+
+    return fila;
+}
+
+
+function recalcularTotalFactura() {
+
+    let total = 0;
+
+    const filas =
+        facturaDetalleLista.querySelectorAll(
+            ".factura-detalle-row"
+        );
+
+    filas.forEach(function(fila) {
+
+        const cantidad =
+            parseFloat(
+                fila.querySelector(
+                    ".factura-detalle-cantidad"
+                ).value
+            ) || 0;
+
+        const valor =
+            parseFloat(
+                fila.querySelector(
+                    ".factura-detalle-valor"
+                ).value
+            ) || 0;
+
+        const subtotal =
+            cantidad * valor;
+
+        fila.querySelector(
+            ".factura-detalle-subtotal"
+        ).textContent =
+            "$" + subtotal.toLocaleString("es-CL");
+
+        total += subtotal;
+    });
+
+
+    const totalElement =
+        document.getElementById("factura-total");
+
+    if (totalElement) {
+
+        totalElement.textContent =
+            "$" + total.toLocaleString("es-CL");
+    }
+
+    return total;
+}
+
+
+if (btnNuevaFactura) {
+
+    btnNuevaFactura.addEventListener(
+        "click",
+        async function() {
+
+            facturaForm.reset();
+
+            document.getElementById(
+                "factura-mensaje"
+            ).textContent = "";
+
+            facturaDetalleLista.innerHTML = "";
+
+            await obtenerProductosParaFactura();
+
+            facturaDetalleLista.appendChild(
+                crearFilaDetalleFactura()
+            );
+
+            recalcularTotalFactura();
+
+            modalFactura.classList.remove("hidden");
+        }
+    );
+}
+
+
+if (document.getElementById("btn-agregar-detalle-factura")) {
+
+    document.getElementById(
+        "btn-agregar-detalle-factura"
+    ).addEventListener("click", function() {
+
+        facturaDetalleLista.appendChild(
+            crearFilaDetalleFactura()
+        );
+    });
+}
+
+
+if (facturaForm) {
+
+    facturaForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            const mensaje =
+                document.getElementById(
+                    "factura-mensaje"
+                );
+
+            mensaje.textContent =
+                "Guardando factura...";
+
+
+            const nombre =
+                document.getElementById(
+                    "factura-nombre"
+                ).value.trim();
+
+            const rut =
+                document.getElementById(
+                    "factura-rut"
+                ).value.trim();
+
+            const giro =
+                document.getElementById(
+                    "factura-giro"
+                ).value.trim();
+
+            const tipoGiro =
+                document.getElementById(
+                    "factura-tipo-giro"
+                ).value.trim();
+
+            const direccion =
+                document.getElementById(
+                    "factura-direccion"
+                ).value.trim();
+
+            const comuna =
+                document.getElementById(
+                    "factura-comuna"
+                ).value.trim();
+
+            const ciudad =
+                document.getElementById(
+                    "factura-ciudad"
+                ).value.trim();
+
+            const contacto =
+                document.getElementById(
+                    "factura-contacto"
+                ).value.trim();
+
+
+            if (!nombre || !rut) {
+
+                mensaje.textContent =
+                    "Completa nombre y RUT.";
+
+                return;
+            }
+
+
+            const filas =
+                Array.from(
+                    facturaDetalleLista.querySelectorAll(
+                        ".factura-detalle-row"
+                    )
+                );
+
+            const items = [];
+
+            for (const fila of filas) {
+
+                const productoId =
+                    fila.querySelector(
+                        ".factura-detalle-producto"
+                    ).value;
+
+                const cantidad =
+                    parseFloat(
+                        fila.querySelector(
+                            ".factura-detalle-cantidad"
+                        ).value
+                    );
+
+                const valor =
+                    parseFloat(
+                        fila.querySelector(
+                            ".factura-detalle-valor"
+                        ).value
+                    );
+
+                const nombreProducto =
+                    fila.querySelector(
+                        ".factura-detalle-producto"
+                    ).selectedOptions[0]
+                        ? fila.querySelector(
+                            ".factura-detalle-producto"
+                        ).selectedOptions[0].textContent.trim()
+                        : "";
+
+                if (
+                    productoId &&
+                    cantidad > 0 &&
+                    valor >= 0
+                ) {
+
+                    items.push({
+                        producto_id: parseInt(productoId),
+                        producto_nombre: nombreProducto,
+                        cantidad: cantidad,
+                        valor_unitario: valor
+                    });
+                }
+            }
+
+
+            if (items.length === 0) {
+
+                mensaje.textContent =
+                    "Agrega al menos un producto con cantidad y valor.";
+
+                return;
+            }
+
+
+            const total =
+                recalcularTotalFactura();
+
+
+            const { data: facturaCreada, error: errorFactura } =
+                await supabaseClient
+                    .from("facturas")
+                    .insert([{
+                        nombre: nombre,
+                        rut: rut,
+                        giro: giro || null,
+                        tipo_giro: tipoGiro || null,
+                        direccion: direccion || null,
+                        comuna: comuna || null,
+                        ciudad: ciudad || null,
+                        contacto: contacto || null,
+                        total: total
+                    }])
+                    .select()
+                    .single();
+
+
+            if (errorFactura) {
+
+                console.error(
+                    "Error guardando factura:",
+                    errorFactura
+                );
+
+                mensaje.textContent =
+                    "Error al guardar la factura.";
+
+                return;
+            }
+
+
+            const detalleAInsertar =
+                items.map(function(item) {
+
+                    return {
+                        factura_id: facturaCreada.id,
+                        producto_id: item.producto_id,
+                        producto_nombre: item.producto_nombre,
+                        cantidad: item.cantidad,
+                        valor_unitario: item.valor_unitario
+                    };
+                });
+
+
+            const { error: errorDetalle } =
+                await supabaseClient
+                    .from("factura_detalle")
+                    .insert(detalleAInsertar);
+
+
+            if (errorDetalle) {
+
+                console.error(
+                    "Error guardando el detalle de la factura:",
+                    errorDetalle
+                );
+
+                mensaje.textContent =
+                    "La factura se guardó, pero hubo un error con el detalle.";
+
+                return;
+            }
+
+
+            mensaje.textContent =
+                "¡Factura guardada correctamente!";
+
+            await cargarFacturas();
+
+            setTimeout(function() {
+
+                modalFactura.classList.add("hidden");
+
+            }, 900);
+        }
+    );
+}
+
+
+// ========================================
+// LISTAR FACTURAS
+// ========================================
+
+async function cargarFacturas() {
+
+    const tabla =
+        document.getElementById("facturas-tabla");
+
+    if (!tabla) return;
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="5" class="empty">
+                Cargando facturas...
+            </td>
+        </tr>
+    `;
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("facturas")
+            .select("*")
+            .order("creado_en", { ascending: false });
+
+
+    if (error) {
+
+        console.error(
+            "Error cargando facturas:",
+            error
+        );
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty">
+                    Error al cargar facturas.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty">
+                    No hay facturas registradas.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    tabla.innerHTML = "";
+
+    data.forEach(function(factura) {
+
+        const fila =
+            document.createElement("tr");
+
+        const fecha =
+            new Date(factura.creado_en)
+                .toLocaleDateString("es-CL");
+
+        fila.innerHTML = `
+
+            <td>${fecha}</td>
+
+            <td><strong>${factura.nombre}</strong></td>
+
+            <td>${factura.rut}</td>
+
+            <td>$${Number(factura.total || 0).toLocaleString("es-CL")}</td>
+
+            <td>
+
+                <button
+                    class="btn-action btn-edit"
+                    onclick="verFactura(${factura.id})"
+                >
+                    Ver
+                </button>
+
+                <button
+                    class="btn-action btn-delete"
+                    onclick="eliminarFactura(${factura.id})"
+                >
+                    Eliminar
+                </button>
+
+            </td>
+
+        `;
+
+        tabla.appendChild(fila);
+    });
+}
+
+
+async function verFactura(id) {
+
+    const { data: factura, error: errorFactura } =
+        await supabaseClient
+            .from("facturas")
+            .select("*")
+            .eq("id", id)
+            .single();
+
+    if (errorFactura) {
+
+        console.error(
+            "Error obteniendo factura:",
+            errorFactura
+        );
+
+        alert("No se pudo cargar la factura.");
+        return;
+    }
+
+
+    const { data: detalle, error: errorDetalle } =
+        await supabaseClient
+            .from("factura_detalle")
+            .select("*")
+            .eq("factura_id", id);
+
+    if (errorDetalle) {
+
+        console.error(
+            "Error obteniendo el detalle:",
+            errorDetalle
+        );
+    }
+
+
+    document.getElementById(
+        "ver-factura-nombre"
+    ).textContent = factura.nombre;
+
+    document.getElementById(
+        "ver-factura-rut"
+    ).textContent = "RUT: " + factura.rut;
+
+    document.getElementById(
+        "ver-factura-giro"
+    ).textContent = factura.giro || "-";
+
+    document.getElementById(
+        "ver-factura-tipo-giro"
+    ).textContent = factura.tipo_giro || "-";
+
+    document.getElementById(
+        "ver-factura-direccion"
+    ).textContent = factura.direccion || "-";
+
+    document.getElementById(
+        "ver-factura-comuna"
+    ).textContent = factura.comuna || "-";
+
+    document.getElementById(
+        "ver-factura-ciudad"
+    ).textContent = factura.ciudad || "-";
+
+    document.getElementById(
+        "ver-factura-contacto"
+    ).textContent = factura.contacto || "-";
+
+
+    const contenedorProductos =
+        document.getElementById(
+            "ver-factura-productos"
+        );
+
+    contenedorProductos.innerHTML = "";
+
+    (detalle || []).forEach(function(item) {
+
+        const fila =
+            document.createElement("div");
+
+        fila.className = "detalle-row";
+
+        fila.innerHTML = `
+            <span>
+                ${item.producto_nombre || "Producto"}
+                (x${item.cantidad})
+            </span>
+            <strong>
+                $${Number(item.subtotal || (item.cantidad * item.valor_unitario)).toLocaleString("es-CL")}
+            </strong>
+        `;
+
+        contenedorProductos.appendChild(fila);
+    });
+
+
+    document.getElementById(
+        "ver-factura-total"
+    ).textContent =
+        "$" + Number(factura.total || 0).toLocaleString("es-CL");
+
+
+    modalVerFactura.classList.remove("hidden");
+}
+
+
+async function eliminarFactura(id) {
+
+    const confirmar =
+        confirm(
+            "¿Seguro que quieres eliminar esta factura? Esta acción no se puede deshacer."
+        );
+
+    if (!confirmar) return;
+
+    const { error } =
+        await supabaseClient
+            .from("facturas")
+            .delete()
+            .eq("id", id);
+
+    if (error) {
+
+        console.error(
+            "Error eliminando factura:",
+            error
+        );
+
+        alert("No se pudo eliminar la factura.");
+        return;
+    }
+
+    await cargarFacturas();
 }
