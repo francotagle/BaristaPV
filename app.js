@@ -8,6 +8,22 @@ const supabaseClient = window.supabase.createClient(
 
 
 // ========================================
+// EMAILJS (envío de reportes por correo)
+// Reemplazá estos 3 valores con los tuyos
+// desde el panel de emailjs.com
+// ========================================
+
+const EMAILJS_PUBLIC_KEY = "c0x871xfoRP37AgYL";
+const EMAILJS_SERVICE_ID = "service_6fnyifi";
+const EMAILJS_TEMPLATE_ID = "template_5jrtc14";
+
+if (window.emailjs) {
+
+    emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+}
+
+
+// ========================================
 // ELEMENTOS GENERALES
 // ========================================
 
@@ -197,6 +213,13 @@ menuItems.forEach(function(button) {
         if (sectionName === "facturas") {
 
             cargarFacturas();
+
+        }
+
+
+        if (sectionName === "reportes") {
+
+            cargarReportes();
 
         }
 
@@ -2277,4 +2300,408 @@ async function eliminarFactura(id) {
     }
 
     await cargarFacturas();
+}
+
+
+// ========================================
+// REPORTES
+// ========================================
+
+let reporteActual = [];
+
+
+function calcularEstadoProducto(producto) {
+
+    if (producto.stock_actual <= 0) {
+
+        return { estado: "Agotado", clase: "stock-agotado" };
+    }
+
+    if (producto.stock_actual <= producto.stock_minimo) {
+
+        return { estado: "Stock bajo", clase: "stock-bajo" };
+    }
+
+    return { estado: "Normal", clase: "stock-normal" };
+}
+
+
+async function cargarReportes() {
+
+    const tabla =
+        document.getElementById("reportes-tabla");
+
+    if (!tabla) return;
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="3" class="empty">
+                Cargando reporte...
+            </td>
+        </tr>
+    `;
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("productos")
+            .select("id, nombre, stock_actual, stock_minimo")
+            .eq("activo", true)
+            .order("nombre");
+
+    if (error) {
+
+        console.error(
+            "Error cargando el reporte:",
+            error
+        );
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="3" class="empty">
+                    Error al cargar el reporte.
+                </td>
+            </tr>
+        `;
+
+        reporteActual = [];
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="3" class="empty">
+                    No hay productos para mostrar.
+                </td>
+            </tr>
+        `;
+
+        reporteActual = [];
+        return;
+    }
+
+
+    reporteActual =
+        data.map(function(producto) {
+
+            const { estado } =
+                calcularEstadoProducto(producto);
+
+            return {
+                producto: producto.nombre,
+                cantidad: producto.stock_actual,
+                estado: estado
+            };
+        });
+
+
+    tabla.innerHTML = "";
+
+    data.forEach(function(producto) {
+
+        const { estado, clase } =
+            calcularEstadoProducto(producto);
+
+        const fila =
+            document.createElement("tr");
+
+        fila.innerHTML = `
+
+            <td><strong>${producto.nombre}</strong></td>
+
+            <td>${producto.stock_actual}</td>
+
+            <td class="${clase}">${estado}</td>
+
+        `;
+
+        tabla.appendChild(fila);
+    });
+}
+
+
+// ========================================
+// EXPORTAR REPORTE A EXCEL
+// ========================================
+
+const btnExportarExcel =
+    document.getElementById("btn-exportar-excel");
+
+if (btnExportarExcel) {
+
+    btnExportarExcel.addEventListener("click", function() {
+
+        if (!window.XLSX) {
+
+            alert(
+                "No se pudo cargar la librería de Excel. Revisa tu conexión."
+            );
+
+            return;
+        }
+
+        if (reporteActual.length === 0) {
+
+            alert("No hay datos para exportar todavía.");
+            return;
+        }
+
+
+        const filas =
+            reporteActual.map(function(item) {
+
+                return {
+                    Producto: item.producto,
+                    Cantidad: item.cantidad,
+                    Estado: item.estado
+                };
+            });
+
+        const hoja =
+            XLSX.utils.json_to_sheet(filas);
+
+        const libro =
+            XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+            libro, hoja, "Inventario"
+        );
+
+        const fechaArchivo =
+            new Date()
+                .toISOString()
+                .slice(0, 10);
+
+        XLSX.writeFile(
+            libro,
+            `reporte-inventario-${fechaArchivo}.xlsx`
+        );
+    });
+}
+
+
+// ========================================
+// ENVIAR REPORTE POR CORREO
+// ========================================
+
+const btnEnviarReporte =
+    document.getElementById("btn-enviar-reporte");
+
+const modalEnviarReporte =
+    document.getElementById("modal-enviar-reporte");
+
+const enviarReporteForm =
+    document.getElementById("enviar-reporte-form");
+
+
+async function cargarCorreosGuardados() {
+
+    const datalist =
+        document.getElementById(
+            "reportes-correos-guardados"
+        );
+
+    if (!datalist) return;
+
+    const { data, error } =
+        await supabaseClient
+            .from("correos_reportes")
+            .select("email")
+            .order("usado_en", { ascending: false });
+
+    if (error) {
+
+        console.error(
+            "Error cargando correos guardados:",
+            error
+        );
+
+        return;
+    }
+
+    datalist.innerHTML = "";
+
+    (data || []).forEach(function(fila) {
+
+        const opcion =
+            document.createElement("option");
+
+        opcion.value = fila.email;
+
+        datalist.appendChild(opcion);
+    });
+}
+
+
+async function guardarCorreoUsado(email) {
+
+    const { error } =
+        await supabaseClient
+            .from("correos_reportes")
+            .upsert(
+                { email: email, usado_en: new Date().toISOString() },
+                { onConflict: "email" }
+            );
+
+    if (error) {
+
+        console.error(
+            "Error guardando el correo:",
+            error
+        );
+    }
+}
+
+
+function construirTablaHtmlReporte() {
+
+    let filasHtml = "";
+
+    reporteActual.forEach(function(item) {
+
+        filasHtml += `
+            <tr>
+                <td style="padding:6px 10px; border:1px solid #ddd;">
+                    ${item.producto}
+                </td>
+                <td style="padding:6px 10px; border:1px solid #ddd;">
+                    ${item.cantidad}
+                </td>
+                <td style="padding:6px 10px; border:1px solid #ddd;">
+                    ${item.estado}
+                </td>
+            </tr>
+        `;
+    });
+
+    return `
+        <table style="border-collapse:collapse; font-family:sans-serif; font-size:14px;">
+            <thead>
+                <tr>
+                    <th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">
+                        Producto
+                    </th>
+                    <th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">
+                        Cantidad
+                    </th>
+                    <th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">
+                        Estado
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                ${filasHtml}
+            </tbody>
+        </table>
+    `;
+}
+
+
+if (btnEnviarReporte) {
+
+    btnEnviarReporte.addEventListener(
+        "click",
+        async function() {
+
+            if (reporteActual.length === 0) {
+
+                alert("No hay datos para enviar todavía.");
+                return;
+            }
+
+            document.getElementById(
+                "reporte-mensaje"
+            ).textContent = "";
+
+            enviarReporteForm.reset();
+
+            await cargarCorreosGuardados();
+
+            modalEnviarReporte.classList.remove("hidden");
+        }
+    );
+}
+
+
+if (enviarReporteForm) {
+
+    enviarReporteForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            const mensaje =
+                document.getElementById(
+                    "reporte-mensaje"
+                );
+
+            const email =
+                document.getElementById(
+                    "reporte-email"
+                ).value.trim();
+
+            if (!email) return;
+
+            if (!window.emailjs) {
+
+                mensaje.textContent =
+                    "No se pudo cargar EmailJS.";
+
+                return;
+            }
+
+            if (
+                EMAILJS_SERVICE_ID.indexOf("PEGA_AQUI") === 0 ||
+                EMAILJS_TEMPLATE_ID.indexOf("PEGA_AQUI") === 0
+            ) {
+
+                mensaje.textContent =
+                    "Falta configurar EmailJS (Service ID / Template ID) en app.js.";
+
+                return;
+            }
+
+            mensaje.textContent =
+                "Enviando...";
+
+
+            try {
+
+                await emailjs.send(
+                    EMAILJS_SERVICE_ID,
+                    EMAILJS_TEMPLATE_ID,
+                    {
+                        to_email: email,
+                        mensaje_html: construirTablaHtmlReporte(),
+                        fecha: new Date().toLocaleDateString("es-CL")
+                    }
+                );
+
+                await guardarCorreoUsado(email);
+
+                mensaje.textContent =
+                    "¡Reporte enviado correctamente!";
+
+                setTimeout(function() {
+
+                    modalEnviarReporte.classList.add("hidden");
+
+                }, 900);
+
+            } catch (err) {
+
+                console.error(
+                    "Error enviando el reporte:",
+                    err
+                );
+
+                mensaje.textContent =
+                    "Error al enviar el correo. Revisa la configuración de EmailJS.";
+            }
+        }
+    );
 }

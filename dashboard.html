@@ -733,17 +733,77 @@
                     <div class="panel-header">
 
                         <h2>
-                            Reportes de inventario
+                            Reporte de inventario
                         </h2>
+
+
+                        <div class="panel-header-acciones">
+
+                            <button
+                                id="btn-exportar-excel"
+                                class="btn-secondary"
+                            >
+                                Exportar a Excel
+                            </button>
+
+                            <button
+                                id="btn-enviar-reporte"
+                                class="btn-primary"
+                            >
+                                Enviar por correo
+                            </button>
+
+                        </div>
+
 
                     </div>
 
 
-                    <div style="padding: 25px;">
+                    <div class="table-container">
 
-                        <p style="color: #888;">
-                            Los reportes estarán disponibles próximamente.
-                        </p>
+
+                        <table>
+
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Producto
+                                    </th>
+
+                                    <th>
+                                        Cantidad
+                                    </th>
+
+                                    <th>
+                                        Estado
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="reportes-tabla">
+
+                                <tr>
+
+                                    <td
+                                        colspan="3"
+                                        class="empty"
+                                    >
+                                        Cargando reporte...
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+
+                        </table>
+
 
                     </div>
 
@@ -1398,6 +1458,99 @@
 
 
     <!-- ========================================
+         MODAL ENVIAR REPORTE POR CORREO
+    ========================================= -->
+
+    <div
+        id="modal-enviar-reporte"
+        class="modal hidden"
+    >
+
+
+        <div class="modal-box">
+
+
+            <div class="modal-header">
+
+
+                <div>
+
+                    <h2>
+                        Enviar reporte por correo
+                    </h2>
+
+                    <p>
+                        Producto, cantidad y estado del inventario actual
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-close="modal-enviar-reporte"
+                >
+                    ×
+                </button>
+
+
+            </div>
+
+
+
+            <form id="enviar-reporte-form">
+
+
+                <label for="reporte-email">
+                    Correo destinatario
+                </label>
+
+                <input
+                    type="email"
+                    id="reporte-email"
+                    list="reportes-correos-guardados"
+                    placeholder="correo@ejemplo.com"
+                    required
+                >
+
+                <datalist id="reportes-correos-guardados"></datalist>
+
+
+                <p id="reporte-mensaje"></p>
+
+
+                <div class="modal-actions">
+
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        data-close="modal-enviar-reporte"
+                    >
+                        Cancelar
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                    >
+                        Enviar
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ========================================
          MODAL DETALLE PRODUCTO (mobile)
     ========================================= -->
 
@@ -1516,6 +1669,16 @@
     ========================================= -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <!-- EXCEL (para exportar reportes) -->
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+
+    <!-- EMAILJS (para enviar reportes por correo) -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 
     <!-- JAVASCRIPT -->

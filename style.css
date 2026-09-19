@@ -775,6 +775,16 @@ button:active {
 
 .panel-header {
 
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
     padding: 20px;
 
     border-bottom:
@@ -789,6 +799,18 @@ button:active {
     color: white;
 
     font-size: 17px;
+}
+
+
+.panel-header-acciones {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    flex-wrap: wrap;
 }
 
 
