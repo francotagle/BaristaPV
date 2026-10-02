@@ -2108,6 +2108,18 @@ select option {
     }
 
 
+    #modal-detalle-producto .modal-actions {
+
+        flex-wrap: wrap;
+    }
+
+
+    #modal-detalle-producto .modal-actions button {
+
+        flex: 1 1 calc(50% - 5px);
+    }
+
+
     .detalle-row {
 
         display: flex;
