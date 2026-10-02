@@ -416,14 +416,6 @@ if (productoForm) {
                     ).value
                 ) || 0;
 
-            const costo =
-                parseFloat(
-                    document.getElementById(
-                        "producto-costo"
-                    ).value
-                ) || 0;
-
-
             if (!nombre) {
 
                 mensaje.textContent =
@@ -456,8 +448,6 @@ if (productoForm) {
                 stock_actual: stock,
 
                 stock_minimo: minimo,
-
-                costo_unitario: costo,
 
                 activo: true
             };
@@ -589,7 +579,7 @@ async function cargarProductos() {
 
     tabla.innerHTML = `
         <tr>
-            <td colspan="8" class="empty">
+            <td colspan="7" class="empty">
                 Cargando productos...
             </td>
         </tr>
@@ -605,7 +595,7 @@ async function cargarProductos() {
                 unidad,
                 stock_actual,
                 stock_minimo,
-                costo_unitario,
+                prioridad,
                 activo,
                 categoria_id,
                 categorias (
@@ -626,7 +616,7 @@ async function cargarProductos() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="8" class="empty">
+                <td colspan="7" class="empty">
                     Error al cargar productos.
                 </td>
             </tr>
@@ -640,7 +630,7 @@ async function cargarProductos() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="8" class="empty">
+                <td colspan="7" class="empty">
                     No hay productos registrados.
                 </td>
             </tr>
@@ -719,12 +709,6 @@ async function cargarProductos() {
                 ${producto.stock_minimo}
             </td>
 
-            <td>
-                $${Number(
-                    producto.costo_unitario
-                ).toLocaleString("es-CL")}
-            </td>
-
             <td class="${claseStock}">
                 ${estado}
             </td>
@@ -744,6 +728,13 @@ async function cargarProductos() {
                 >
                     Desactivar
                 </button>
+
+                <button
+                    type="button"
+                    class="prioridad-circulo${producto.prioridad ? " activo" : ""}"
+                    onclick="togglePrioridad(${producto.id}, ${!producto.prioridad})"
+                    title="${producto.prioridad ? "Quitar prioridad" : "Marcar como prioridad"}"
+                ></button>
 
             </td>
 
@@ -849,6 +840,40 @@ async function desactivarProducto(id) {
 
 
 // ========================================
+// MARCAR / QUITAR PRIORIDAD
+// ========================================
+
+async function togglePrioridad(id, nuevoValor) {
+
+    const { error } =
+        await supabaseClient
+            .from("productos")
+            .update({
+                prioridad: nuevoValor
+            })
+            .eq("id", id);
+
+
+    if (error) {
+
+        console.error(
+            "Error actualizando prioridad:",
+            error
+        );
+
+        alert(
+            "No se pudo actualizar la prioridad."
+        );
+
+        return;
+    }
+
+
+    await cargarProductos();
+}
+
+
+// ========================================
 // EDITAR PRODUCTO
 // ========================================
 
@@ -909,11 +934,6 @@ async function editarProducto(id) {
     document.getElementById(
         "producto-minimo"
     ).value = data.stock_minimo;
-
-
-    document.getElementById(
-        "producto-costo"
-    ).value = data.costo_unitario;
 
 
     document.querySelector(

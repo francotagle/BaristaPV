@@ -379,10 +379,6 @@
                                     </th>
 
                                     <th>
-                                        Costo
-                                    </th>
-
-                                    <th>
                                         Estado
                                     </th>
 
@@ -937,21 +933,6 @@
                 <input
                     type="number"
                     id="producto-minimo"
-                    step="0.01"
-                    min="0"
-                    value="0"
-                    required
-                >
-
-
-
-                <label for="producto-costo">
-                    Costo unitario
-                </label>
-
-                <input
-                    type="number"
-                    id="producto-costo"
                     step="0.01"
                     min="0"
                     value="0"
@@ -1615,13 +1596,13 @@
                 </div>
 
                 <div class="detalle-row">
-                    <span>Costo unitario</span>
-                    <strong id="detalle-costo"></strong>
+                    <span>Estado</span>
+                    <strong id="detalle-estado"></strong>
                 </div>
 
                 <div class="detalle-row">
-                    <span>Estado</span>
-                    <strong id="detalle-estado"></strong>
+                    <span>Prioridad</span>
+                    <strong id="detalle-prioridad"></strong>
                 </div>
 
             </div>
@@ -1652,6 +1633,14 @@
                     id="detalle-desactivar-btn"
                 >
                     Desactivar
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-prioridad btn-action"
+                    id="detalle-prioridad-btn"
+                >
+                    Marcar prioridad
                 </button>
 
             </div>
@@ -1859,7 +1848,7 @@
 
                     var celdas = fila.querySelectorAll('td');
 
-                    if (celdas.length < 8) {
+                    if (celdas.length < 7) {
                         return;
                     }
 
@@ -1878,16 +1867,27 @@
                     document.getElementById('detalle-minimo').textContent =
                         celdas[4].textContent.trim();
 
-                    document.getElementById('detalle-costo').textContent =
+                    document.getElementById('detalle-estado').textContent =
                         celdas[5].textContent.trim();
 
-                    document.getElementById('detalle-estado').textContent =
-                        celdas[6].textContent.trim();
+                    var celdaAcciones = celdas[6];
+
+                    var circuloPrioridad =
+                        celdaAcciones.querySelector('.prioridad-circulo');
+
+                    var esPrioridad =
+                        circuloPrioridad
+                            ? circuloPrioridad.classList.contains('activo')
+                            : false;
+
+                    document.getElementById('detalle-prioridad').textContent =
+                        esPrioridad ? 'Sí' : 'No';
 
                     var id = fila.dataset.id;
 
                     var btnEditar = document.getElementById('detalle-editar-btn');
                     var btnDesactivar = document.getElementById('detalle-desactivar-btn');
+                    var btnPrioridad = document.getElementById('detalle-prioridad-btn');
 
                     if (btnEditar) {
                         btnEditar.onclick = function () {
@@ -1900,6 +1900,17 @@
                         btnDesactivar.onclick = function () {
                             modalDetalle.classList.add('hidden');
                             desactivarProducto(id);
+                        };
+                    }
+
+                    if (btnPrioridad) {
+
+                        btnPrioridad.textContent =
+                            esPrioridad ? 'Quitar prioridad' : 'Marcar prioridad';
+
+                        btnPrioridad.onclick = function () {
+                            modalDetalle.classList.add('hidden');
+                            togglePrioridad(id, !esPrioridad);
                         };
                     }
 

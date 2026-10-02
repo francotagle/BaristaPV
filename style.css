@@ -1219,6 +1219,83 @@ td strong {
 
 
 /* ========================================
+   CÍRCULO DE PRIORIDAD
+======================================== */
+
+.prioridad-circulo {
+
+    width: 20px;
+    height: 20px;
+
+    padding: 0;
+
+    margin-left: 2px;
+
+    vertical-align: middle;
+
+    border-radius: 50%;
+
+    background: transparent;
+
+    border:
+        2px solid var(--amarillo);
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s,
+        box-shadow 0.2s,
+        transform 0.15s;
+}
+
+
+.prioridad-circulo:hover {
+
+    box-shadow:
+        0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+
+.prioridad-circulo:active {
+
+    transform: scale(0.9);
+}
+
+
+.prioridad-circulo.activo {
+
+    background: var(--amarillo);
+
+    box-shadow:
+        0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+
+/* botón "Marcar/Quitar prioridad" del modal de detalle (mobile) */
+
+.btn-prioridad {
+
+    background:
+        rgba(245, 158, 11, 0.12);
+
+    color: var(--amarillo);
+
+    border:
+        1px solid
+        rgba(245, 158, 11, 0.3);
+}
+
+
+.btn-prioridad:hover {
+
+    background:
+        rgba(245, 158, 11, 0.22);
+
+    color: #fbbf24;
+}
+
+
+/* ========================================
    MODALES
 ======================================== */
 
@@ -1995,7 +2072,7 @@ select option {
 
 
     /* TABLA PRODUCTOS: solo Producto, Stock y Estado.
-       Categoría, Unidad, Mínimo, Costo y Acciones se ocultan
+       Categoría, Unidad, Mínimo y Acciones se ocultan
        y se ven al tocar la fila (modal de detalle) */
 
     .product-table-panel table {
@@ -2010,10 +2087,8 @@ select option {
     .product-table-panel td:nth-child(3),
     .product-table-panel th:nth-child(5),
     .product-table-panel td:nth-child(5),
-    .product-table-panel th:nth-child(6),
-    .product-table-panel td:nth-child(6),
-    .product-table-panel th:nth-child(8),
-    .product-table-panel td:nth-child(8) {
+    .product-table-panel th:nth-child(7),
+    .product-table-panel td:nth-child(7) {
 
         display: none;
     }
