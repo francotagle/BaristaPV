@@ -576,6 +576,8 @@ async function cargarProductos() {
 
     if (!tabla) return;
 
+    cargarPrioridad();
+
 
     tabla.innerHTML = `
         <tr>
@@ -743,6 +745,148 @@ async function cargarProductos() {
 
         tabla.appendChild(fila);
 
+    });
+}
+
+
+// ========================================
+// CARGAR PRODUCTOS PRIORITARIOS (INICIO)
+// ========================================
+
+async function cargarPrioridad() {
+
+    const tabla =
+        document.getElementById(
+            "prioridad-tabla"
+        );
+
+    if (!tabla) return;
+
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="4" class="empty">
+                Cargando productos prioritarios...
+            </td>
+        </tr>
+    `;
+
+
+    const { data, error } =
+        await supabaseClient
+            .from("productos")
+            .select(`
+                id,
+                nombre,
+                stock_actual,
+                stock_minimo,
+                categorias (
+                    nombre
+                )
+            `)
+            .eq("activo", true)
+            .eq("prioridad", true)
+            .order("nombre");
+
+
+    if (error) {
+
+        console.error(
+            "Error cargando productos prioritarios:",
+            error
+        );
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty">
+                    Error al cargar la prioridad.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    if (!data || data.length === 0) {
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty">
+                    No hay productos marcados como prioridad.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    tabla.innerHTML = "";
+
+
+    data.forEach(function(producto) {
+
+        let estado = "";
+        let claseStock = "";
+
+
+        if (producto.stock_actual <= 0) {
+
+            estado = "Agotado";
+            claseStock = "stock-agotado";
+
+        }
+        else if (
+            producto.stock_actual <=
+            producto.stock_minimo
+        ) {
+
+            estado = "Stock bajo";
+            claseStock = "stock-bajo";
+
+        }
+        else {
+
+            estado = "Normal";
+            claseStock = "stock-normal";
+
+        }
+
+
+        const categoria =
+            producto.categorias
+                ? producto.categorias.nombre
+                : "Sin categoría";
+
+
+        const fila =
+            document.createElement("tr");
+
+        fila.innerHTML = `
+
+            <td>
+                <strong>
+                    ${producto.nombre}
+                </strong>
+            </td>
+
+            <td>
+                ${categoria}
+            </td>
+
+            <td class="${claseStock}">
+                ${producto.stock_actual}
+            </td>
+
+            <td class="${claseStock}">
+                ${estado}
+            </td>
+
+        `;
+
+
+        tabla.appendChild(fila);
     });
 }
 
