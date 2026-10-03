@@ -614,7 +614,7 @@ button:active {
 ======================================== */
 
 /* Reemplazá la url() de abajo por la ruta de tu foto
-   (ej: url("imagen/topbar-fondo.jpg")) */
+   (ej: url("imagen/banner.jpg")) */
 
 .topbar-hero {
 
@@ -634,7 +634,7 @@ button:active {
 
     overflow: hidden;
 
-    background-image: url("imagen/topbar-fondo.jpg");
+    background-image: url("imagen/banner.jpg");
 
     background-size: cover;
 
