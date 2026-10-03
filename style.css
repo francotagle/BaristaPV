@@ -603,7 +603,17 @@ button:active {
 
     font-size: 27px;
 
+    font-weight: 600;
+
     letter-spacing: 0.2px;
+}
+
+
+.brand-accent {
+
+    color: var(--rojo-hover);
+
+    font-weight: 800;
 }
 
 
