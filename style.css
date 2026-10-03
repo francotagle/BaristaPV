@@ -1920,7 +1920,8 @@ select option {
     }
 
 
-    /* BARRA SUPERIOR MOBILE: hamburguesa + título + usuario */
+    /* BARRA SUPERIOR MOBILE: hamburguesa + título + usuario.
+       La foto del banner queda de fondo, bien atenuada. */
 
     .mobile-topbar {
 
@@ -1932,7 +1933,18 @@ select option {
 
         padding: 14px 16px;
 
-        background: #111111;
+        background-image:
+            linear-gradient(
+                rgba(10, 10, 10, 0.88),
+                rgba(10, 10, 10, 0.88)
+            ),
+            url("imagen/banner.jpg");
+
+        background-size: cover;
+
+        background-position: center;
+
+        background-color: #111111;
 
         border-bottom:
             1px solid var(--borde);

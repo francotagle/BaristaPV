@@ -765,7 +765,7 @@ async function cargarPrioridad() {
 
     tabla.innerHTML = `
         <tr>
-            <td colspan="4" class="empty">
+            <td colspan="2" class="empty">
                 Cargando productos prioritarios...
             </td>
         </tr>
@@ -779,10 +779,7 @@ async function cargarPrioridad() {
                 id,
                 nombre,
                 stock_actual,
-                stock_minimo,
-                categorias (
-                    nombre
-                )
+                stock_minimo
             `)
             .eq("activo", true)
             .eq("prioridad", true)
@@ -798,7 +795,7 @@ async function cargarPrioridad() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="4" class="empty">
+                <td colspan="2" class="empty">
                     Error al cargar la prioridad.
                 </td>
             </tr>
@@ -812,7 +809,7 @@ async function cargarPrioridad() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="4" class="empty">
+                <td colspan="2" class="empty">
                     No hay productos marcados como prioridad.
                 </td>
             </tr>
@@ -827,13 +824,11 @@ async function cargarPrioridad() {
 
     data.forEach(function(producto) {
 
-        let estado = "";
         let claseStock = "";
 
 
         if (producto.stock_actual <= 0) {
 
-            estado = "Agotado";
             claseStock = "stock-agotado";
 
         }
@@ -842,22 +837,13 @@ async function cargarPrioridad() {
             producto.stock_minimo
         ) {
 
-            estado = "Stock bajo";
             claseStock = "stock-bajo";
 
         }
         else {
 
-            estado = "Normal";
             claseStock = "stock-normal";
-
         }
-
-
-        const categoria =
-            producto.categorias
-                ? producto.categorias.nombre
-                : "Sin categoría";
 
 
         const fila =
@@ -871,16 +857,8 @@ async function cargarPrioridad() {
                 </strong>
             </td>
 
-            <td>
-                ${categoria}
-            </td>
-
             <td class="${claseStock}">
                 ${producto.stock_actual}
-            </td>
-
-            <td class="${claseStock}">
-                ${estado}
             </td>
 
         `;
