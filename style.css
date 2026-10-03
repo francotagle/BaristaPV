@@ -609,11 +609,116 @@ button:active {
 }
 
 
-.brand-accent {
+/* ========================================
+   TOPBAR CON FOTO DE FONDO
+======================================== */
 
-    color: var(--rojo-hover);
+/* Reemplazá la url() de abajo por la ruta de tu foto
+   (ej: url("imagen/topbar-fondo.jpg")) */
 
-    font-weight: 800;
+.topbar-hero {
+
+    position: relative;
+
+    height: 230px;
+
+    padding: 20px;
+
+    justify-content: center;
+
+    align-items: center;
+
+    border-bottom: none;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    background-image: url("imagen/topbar-fondo.jpg");
+
+    background-size: cover;
+
+    background-position: center;
+
+    background-color: var(--negro-panel);
+}
+
+
+.topbar-hero::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(11, 11, 11, 0.15) 0%,
+            rgba(11, 11, 11, 0.55) 55%,
+            rgba(11, 11, 11, 0.95) 100%
+        );
+}
+
+
+.topbar-hero-content {
+
+    position: relative;
+
+    z-index: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 14px;
+}
+
+
+.topbar-hero-logo {
+
+    width: 76px;
+    height: 76px;
+
+    border-radius: 50%;
+
+    border: 3px solid white;
+
+    object-fit: cover;
+
+    background: var(--negro-panel);
+
+    padding: 4px;
+}
+
+
+.topbar-hero-title {
+
+    margin: 0;
+
+    color: white;
+
+    font-size: 23px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.3px;
+
+    text-align: center;
+}
+
+
+.topbar-hero-user {
+
+    position: absolute;
+
+    top: 16px;
+    right: 16px;
+
+    z-index: 2;
 }
 
 
