@@ -2100,6 +2100,11 @@ select option {
 
     .sidebar-menu .topbar-user {
 
+        position: static;
+
+        top: auto;
+        right: auto;
+
         margin-top: auto;
 
         flex-direction: column;
