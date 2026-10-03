@@ -153,6 +153,9 @@ button:active {
    LOGIN
 ======================================== */
 
+/* Foto de fondo tenue: reemplazá la url() de abajo
+   por el nombre real de tu foto dentro de imagen/ */
+
 .login-container {
 
     min-height: 100vh;
@@ -164,13 +167,20 @@ button:active {
 
     padding: 20px;
 
-    background:
+    background-image:
         radial-gradient(
             circle at top,
-            #251010 0%,
-            #0b0b0b 45%,
-            #050505 100%
-        );
+            rgba(37, 16, 16, 0.88) 0%,
+            rgba(11, 11, 11, 0.93) 45%,
+            rgba(5, 5, 5, 0.97) 100%
+        ),
+        url("imagen/fondologg.jpg");
+
+    background-size: cover;
+
+    background-position: center;
+
+    background-color: var(--negro);
 }
 
 
