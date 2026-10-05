@@ -2702,9 +2702,25 @@ function construirTablaHtmlReporte() {
 
     const estilo = "padding:4px 8px;border:1px solid #ddd;";
 
+    // Solo se envían por correo los productos que requieren atención
+    // (Stock bajo / Agotado); el inventario completo ya se ve en el panel.
+    const items =
+        reporteActual.filter(function(item) {
+            return item.estado !== "Normal";
+        });
+
+    if (items.length === 0) {
+
+        return (
+            "<p style=\"font-family:sans-serif;font-size:14px;\">" +
+            "No hay productos con stock bajo o agotado por el momento." +
+            "</p>"
+        );
+    }
+
     let filasHtml = "";
 
-    reporteActual.forEach(function(item) {
+    items.forEach(function(item) {
 
         filasHtml +=
             "<tr>" +
