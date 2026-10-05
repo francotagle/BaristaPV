@@ -2700,45 +2700,30 @@ async function guardarCorreoUsado(email) {
 
 function construirTablaHtmlReporte() {
 
+    const estilo = "padding:4px 8px;border:1px solid #ddd;";
+
     let filasHtml = "";
 
     reporteActual.forEach(function(item) {
 
-        filasHtml += `
-            <tr>
-                <td style="padding:6px 10px; border:1px solid #ddd;">
-                    ${item.producto}
-                </td>
-                <td style="padding:6px 10px; border:1px solid #ddd;">
-                    ${item.cantidad}
-                </td>
-                <td style="padding:6px 10px; border:1px solid #ddd;">
-                    ${item.estado}
-                </td>
-            </tr>
-        `;
+        filasHtml +=
+            "<tr>" +
+            "<td style=\"" + estilo + "\">" + item.producto + "</td>" +
+            "<td style=\"" + estilo + "\">" + item.cantidad + "</td>" +
+            "<td style=\"" + estilo + "\">" + item.estado + "</td>" +
+            "</tr>";
     });
 
-    return `
-        <table style="border-collapse:collapse; font-family:sans-serif; font-size:14px;">
-            <thead>
-                <tr>
-                    <th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">
-                        Producto
-                    </th>
-                    <th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">
-                        Cantidad
-                    </th>
-                    <th style="padding:6px 10px; border:1px solid #ddd; text-align:left;">
-                        Estado
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                ${filasHtml}
-            </tbody>
-        </table>
-    `;
+    return (
+        "<table style=\"border-collapse:collapse;font-family:sans-serif;font-size:13px;\">" +
+        "<thead><tr>" +
+        "<th style=\"" + estilo + "text-align:left;\">Producto</th>" +
+        "<th style=\"" + estilo + "text-align:left;\">Cantidad</th>" +
+        "<th style=\"" + estilo + "text-align:left;\">Estado</th>" +
+        "</tr></thead>" +
+        "<tbody>" + filasHtml + "</tbody>" +
+        "</table>"
+    );
 }
 
 
@@ -2841,8 +2826,14 @@ if (enviarReporteForm) {
                     err
                 );
 
+                const detalle =
+                    (err && (err.text || err.message)) ||
+                    "sin detalle";
+
                 mensaje.textContent =
-                    "Error al enviar el correo. Revisa la configuración de EmailJS.";
+                    "Error al enviar el correo (" +
+                    detalle +
+                    ").";
             }
         }
     );
