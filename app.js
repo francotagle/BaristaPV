@@ -417,6 +417,8 @@ function aplicarPermisos() {
 
     // Cocina y barra: solo Productos (stock actual) y 86
 
+    document.body.classList.add("cargo-restringido");
+
     menuItems.forEach(function(item) {
 
         const permitido =
@@ -1521,11 +1523,16 @@ async function editarProducto(id) {
 
     });
 
+    modalProducto.classList.toggle(
+        "solo-stock",
+        restringido
+    );
+
     if (restringido) {
 
         document.querySelector(
             "#modal-producto h2"
-        ).textContent = "Actualizar stock";
+        ).textContent = "Actualizar stock: " + data.nombre;
     }
 
 

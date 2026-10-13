@@ -2025,6 +2025,11 @@
                         return;
                     }
 
+                    // Cocina y barra no ven el detalle completo
+                    if (typeof esRestringido === 'function' && esRestringido()) {
+                        return;
+                    }
+
                     var fila = e.target.closest('tr');
 
                     if (!fila || !fila.dataset.id) {

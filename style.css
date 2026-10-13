@@ -2676,3 +2676,33 @@ body.cargando-rol .dashboard {
 
     font-size: 14px;
 }
+
+
+/* ========================================
+   COCINA / BARRA: SOLO NOMBRE Y STOCK ACTUAL
+======================================== */
+
+body.cargo-restringido #section-productos th:nth-child(2),
+body.cargo-restringido #section-productos td:nth-child(2),
+body.cargo-restringido #section-productos th:nth-child(3),
+body.cargo-restringido #section-productos td:nth-child(3),
+body.cargo-restringido #section-productos th:nth-child(5),
+body.cargo-restringido #section-productos td:nth-child(5),
+body.cargo-restringido #section-productos th:nth-child(6),
+body.cargo-restringido #section-productos td:nth-child(6) {
+
+    display: none;
+}
+
+
+#modal-producto.solo-stock label[for="producto-nombre"],
+#modal-producto.solo-stock label[for="producto-categoria"],
+#modal-producto.solo-stock label[for="producto-unidad"],
+#modal-producto.solo-stock label[for="producto-minimo"],
+#modal-producto.solo-stock #producto-nombre,
+#modal-producto.solo-stock #producto-categoria,
+#modal-producto.solo-stock #producto-unidad,
+#modal-producto.solo-stock #producto-minimo {
+
+    display: none;
+}
