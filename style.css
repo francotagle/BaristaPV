@@ -2364,3 +2364,215 @@ select option {
     color: #d32f2f;
     font-weight: 600;
 }
+
+/* ========================================
+   86 (PIZARRA)
+======================================== */
+
+.menu-badge {
+
+    margin-left: auto;
+
+    min-width: 20px;
+
+    padding: 2px 7px;
+
+    background: var(--rojo);
+
+    color: white;
+
+    border-radius: 10px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    text-align: center;
+}
+
+
+.menu-badge.hidden {
+
+    display: none;
+}
+
+
+.pizarra {
+
+    background: #1f2a26;
+
+    border: 10px solid #4a3426;
+
+    border-radius: 10px;
+
+    box-shadow:
+        inset 0 0 40px rgba(0, 0, 0, 0.45),
+        var(--sombra);
+
+    padding: 22px;
+
+    min-height: 320px;
+}
+
+
+.pizarra-titulo {
+
+    color: #f1efe6;
+
+    font-size: 26px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    text-align: center;
+
+    margin-bottom: 18px;
+}
+
+
+.pizarra-form {
+
+    display: flex;
+
+    gap: 10px;
+
+    margin-bottom: 8px;
+}
+
+
+.pizarra-form input {
+
+    flex: 1;
+
+    min-width: 0;
+}
+
+
+.pizarra-mensaje {
+
+    min-height: 18px;
+
+    margin: 6px 0 12px;
+
+    color: #ffb4b4;
+
+    font-size: 13px;
+}
+
+
+.pizarra-lista {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(210px, 1fr));
+
+    gap: 12px;
+}
+
+
+.pizarra-item {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 12px 14px;
+
+    background: rgba(255, 255, 255, 0.07);
+
+    border: 2px dashed rgba(241, 239, 230, 0.55);
+
+    border-radius: 8px;
+
+    color: #f1efe6;
+}
+
+
+.pizarra-item-nombre {
+
+    display: block;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    word-break: break-word;
+}
+
+
+.pizarra-item-hora {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+    color: rgba(241, 239, 230, 0.6);
+}
+
+
+.pizarra-borrar {
+
+    flex-shrink: 0;
+
+    width: 32px;
+
+    height: 32px;
+
+    background: transparent;
+
+    color: #f1efe6;
+
+    border: 1px solid rgba(241, 239, 230, 0.4);
+
+    border-radius: 50%;
+
+    font-size: 20px;
+
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+
+.pizarra-borrar:hover {
+
+    background: var(--rojo);
+
+    border-color: var(--rojo);
+}
+
+
+.pizarra-vacio {
+
+    grid-column: 1 / -1;
+
+    margin: 20px 0;
+
+    text-align: center;
+
+    color: rgba(241, 239, 230, 0.6);
+}
+
+
+@media (max-width: 700px) {
+
+    .pizarra {
+
+        padding: 14px;
+
+        border-width: 6px;
+    }
+
+    .pizarra-lista {
+
+        grid-template-columns: 1fr;
+    }
+}

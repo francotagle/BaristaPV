@@ -150,6 +150,9 @@ const sections = {
     inicio:
         document.getElementById("section-inicio"),
 
+    "86":
+        document.getElementById("section-86"),
+
     productos:
         document.getElementById("section-productos"),
 
@@ -206,6 +209,13 @@ menuItems.forEach(function(button) {
 
             cargarProductos();
             cargarCategorias();
+
+        }
+
+
+        if (sectionName === "86") {
+
+            cargar86();
 
         }
 
@@ -2853,4 +2863,233 @@ if (enviarReporteForm) {
             }
         }
     );
+}
+
+
+// ========================================
+// 86 (LO QUE FALTA O SE ACABA)
+// ========================================
+
+const form86 =
+    document.getElementById("form-86");
+
+const input86 =
+    document.getElementById("input-86");
+
+const lista86 =
+    document.getElementById("lista-86");
+
+const mensaje86 =
+    document.getElementById("mensaje-86");
+
+const badge86 =
+    document.getElementById("badge-86");
+
+
+function actualizarBadge86(cantidad) {
+
+    if (!badge86) return;
+
+    badge86.textContent = cantidad;
+
+    badge86.classList.toggle(
+        "hidden",
+        cantidad === 0
+    );
+}
+
+
+async function cargar86() {
+
+    if (!lista86) return;
+
+    const { data, error } =
+        await supabaseClient
+            .from("ochenta_y_seis")
+            .select("id, nombre, created_at")
+            .order("created_at", { ascending: false });
+
+
+    if (error) {
+
+        console.error(
+            "Error cargando 86:",
+            error
+        );
+
+        if (mensaje86) {
+
+            mensaje86.textContent =
+                "No se pudo cargar la pizarra. " +
+                "¿Está creada la tabla ochenta_y_seis en Supabase?";
+        }
+
+        return;
+    }
+
+
+    if (mensaje86) mensaje86.textContent = "";
+
+    lista86.innerHTML = "";
+
+    actualizarBadge86(data.length);
+
+
+    if (data.length === 0) {
+
+        const vacio = document.createElement("p");
+
+        vacio.className = "pizarra-vacio";
+
+        vacio.textContent =
+            "No hay nada en 86 por ahora.";
+
+        lista86.appendChild(vacio);
+
+        return;
+    }
+
+
+    data.forEach(function(item) {
+
+        const tarjeta = document.createElement("div");
+
+        tarjeta.className = "pizarra-item";
+
+        const texto = document.createElement("div");
+
+        const nombre = document.createElement("span");
+
+        nombre.className = "pizarra-item-nombre";
+
+        nombre.textContent = item.nombre;
+
+        const hora = document.createElement("span");
+
+        hora.className = "pizarra-item-hora";
+
+        hora.textContent =
+            new Date(item.created_at).toLocaleString(
+                "es-CL",
+                {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+        texto.appendChild(nombre);
+        texto.appendChild(hora);
+
+        const borrar = document.createElement("button");
+
+        borrar.type = "button";
+
+        borrar.className = "pizarra-borrar";
+
+        borrar.setAttribute("aria-label", "Borrar");
+
+        borrar.innerHTML = "&times;";
+
+        borrar.addEventListener("click", function() {
+
+            borrar86(item.id);
+        });
+
+        tarjeta.appendChild(texto);
+        tarjeta.appendChild(borrar);
+
+        lista86.appendChild(tarjeta);
+    });
+}
+
+
+async function borrar86(id) {
+
+    const { error } =
+        await supabaseClient
+            .from("ochenta_y_seis")
+            .delete()
+            .eq("id", id);
+
+
+    if (error) {
+
+        console.error(
+            "Error borrando 86:",
+            error
+        );
+
+        alert("No se pudo borrar el 86.");
+
+        return;
+    }
+
+
+    await cargar86();
+}
+
+
+if (form86) {
+
+    form86.addEventListener(
+        "submit",
+        async function(e) {
+
+            e.preventDefault();
+
+            const nombre = input86.value.trim();
+
+            if (!nombre) return;
+
+
+            const { error } =
+                await supabaseClient
+                    .from("ochenta_y_seis")
+                    .insert({ nombre: nombre });
+
+
+            if (error) {
+
+                console.error(
+                    "Error agregando 86:",
+                    error
+                );
+
+                mensaje86.textContent =
+                    "No se pudo agregar el 86.";
+
+                return;
+            }
+
+
+            input86.value = "";
+
+            input86.focus();
+
+            await cargar86();
+        }
+    );
+
+
+    // Contador en el menú al abrir el dashboard,
+    // y refresco cada 30 s mientras la pizarra está visible
+
+    cargar86();
+
+    setInterval(function() {
+
+        const seccion =
+            document.getElementById("section-86");
+
+        if (
+            seccion &&
+            !seccion.classList.contains("section-hidden")
+        ) {
+
+            cargar86();
+        }
+
+    }, 30000);
 }
