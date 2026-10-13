@@ -315,6 +315,24 @@
 </div>
 
 
+                    <!-- VALOR DEL INVENTARIO (solo master/admin) -->
+                    <div
+                        class="card"
+                        id="card-valor-inventario"
+                        style="display: none;"
+                    >
+                        <h3>
+                            Valor del inventario
+                        </h3>
+                        <div
+                            class="number"
+                            id="valor-inventario"
+                        >
+                            $0
+                        </div>
+                    </div>
+
+
                 </div>
 
 
@@ -438,6 +456,14 @@
 
                                     <th>
                                         Estado
+                                    </th>
+
+                                    <th>
+                                        Costo
+                                    </th>
+
+                                    <th>
+                                        Venta
                                     </th>
 
                                     <th>
@@ -962,6 +988,14 @@
                                         Estado
                                     </th>
 
+                                    <th>
+                                        Costo unit.
+                                    </th>
+
+                                    <th>
+                                        Valor
+                                    </th>
+
                                 </tr>
 
                             </thead>
@@ -1125,6 +1159,38 @@
                 >
 
 
+
+                <div
+                    id="campos-costos"
+                    class="campos-costos"
+                    style="display: none;"
+                >
+
+                    <label for="producto-costo">
+                        Costo por unidad ($)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="producto-costo"
+                        step="1"
+                        min="0"
+                        value="0"
+                    >
+
+                    <label for="producto-venta">
+                        Precio de venta ($)
+                    </label>
+
+                    <input
+                        type="number"
+                        id="producto-venta"
+                        step="1"
+                        min="0"
+                        value="0"
+                    >
+
+                </div>
 
                 <p id="producto-mensaje"></p>
 
@@ -2025,14 +2091,15 @@
                         return;
                     }
 
-                    // Cocina y barra no ven el detalle completo
-                    if (typeof esRestringido === 'function' && esRestringido()) {
-                        return;
-                    }
-
                     var fila = e.target.closest('tr');
 
                     if (!fila || !fila.dataset.id) {
+                        return;
+                    }
+
+                    // Cocina y barra: tocar la fila abre directo "Actualizar stock"
+                    if (typeof esRestringido === 'function' && esRestringido()) {
+                        editarProducto(fila.dataset.id);
                         return;
                     }
 
@@ -2060,7 +2127,7 @@
                     document.getElementById('detalle-estado').textContent =
                         celdas[5].textContent.trim();
 
-                    var celdaAcciones = celdas[6];
+                    var celdaAcciones = celdas[celdas.length - 1];
 
                     var circuloPrioridad =
                         celdaAcciones.querySelector('.prioridad-circulo');

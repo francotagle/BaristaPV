@@ -2208,7 +2208,11 @@ select option {
     .product-table-panel th:nth-child(5),
     .product-table-panel td:nth-child(5),
     .product-table-panel th:nth-child(7),
-    .product-table-panel td:nth-child(7) {
+    .product-table-panel td:nth-child(7),
+    .product-table-panel th:nth-child(8),
+    .product-table-panel td:nth-child(8),
+    .product-table-panel th:nth-child(9),
+    .product-table-panel td:nth-child(9) {
 
         display: none;
     }
@@ -2689,7 +2693,11 @@ body.cargo-restringido #section-productos td:nth-child(3),
 body.cargo-restringido #section-productos th:nth-child(5),
 body.cargo-restringido #section-productos td:nth-child(5),
 body.cargo-restringido #section-productos th:nth-child(6),
-body.cargo-restringido #section-productos td:nth-child(6) {
+body.cargo-restringido #section-productos td:nth-child(6),
+body.cargo-restringido #section-productos th:nth-child(7),
+body.cargo-restringido #section-productos td:nth-child(7),
+body.cargo-restringido #section-productos th:nth-child(8),
+body.cargo-restringido #section-productos td:nth-child(8) {
 
     display: none;
 }
@@ -2705,4 +2713,24 @@ body.cargo-restringido #section-productos td:nth-child(6) {
 #modal-producto.solo-stock #producto-minimo {
 
     display: none;
+}
+
+
+/* ========================================
+   COSTOS (SOLO MASTER / ADMIN)
+======================================== */
+
+.campos-costos {
+
+    margin-top: 6px;
+
+    padding-top: 4px;
+
+    border-top: 1px solid var(--borde);
+}
+
+
+#modal-producto.solo-stock .campos-costos {
+
+    display: none !important;
 }

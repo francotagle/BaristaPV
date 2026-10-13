@@ -139,6 +139,92 @@ function esRestringido() {
 }
 
 
+function puedeVerCostos() {
+
+    return (
+        rolUsuario === "master" ||
+        rolUsuario === "admin"
+    );
+}
+
+
+function formatoPeso(valor) {
+
+    return "$" + Number(valor || 0).toLocaleString("es-CL");
+}
+
+
+// Devuelve { producto_id: { costo_unitario, precio_venta } }
+// Solo master y admin; para otros cargos devuelve {}
+
+async function obtenerCostos() {
+
+    if (!puedeVerCostos()) return {};
+
+    const { data, error } =
+        await supabaseClient
+            .from("producto_costos")
+            .select("producto_id, costo_unitario, precio_venta");
+
+    if (error) {
+
+        console.error(
+            "Error cargando costos:",
+            error
+        );
+
+        return {};
+    }
+
+    const mapa = {};
+
+    data.forEach(function(c) {
+
+        mapa[c.producto_id] = c;
+    });
+
+    return mapa;
+}
+
+
+async function guardarCostos(productoId) {
+
+    const costo =
+        parseFloat(
+            document.getElementById("producto-costo").value
+        ) || 0;
+
+    const venta =
+        parseFloat(
+            document.getElementById("producto-venta").value
+        ) || 0;
+
+    const { error } =
+        await supabaseClient
+            .from("producto_costos")
+            .upsert(
+                {
+                    producto_id: productoId,
+                    costo_unitario: costo,
+                    precio_venta: venta
+                },
+                { onConflict: "producto_id" }
+            );
+
+    if (error) {
+
+        console.error(
+            "Error guardando costos:",
+            error
+        );
+
+        return false;
+    }
+
+    return true;
+}
+
+
 // ========================================
 // CREAR CUENTA (index.html)
 // ========================================
@@ -350,6 +436,14 @@ async function iniciarPermisos(usuario) {
     aplicarPermisos();
 
     document.body.classList.remove("cargando-rol");
+
+    // La carga inicial se hizo antes de saber el cargo: se repite
+    if (!esRestringido()) {
+
+        cargarProductos();
+
+        actualizarResumen();
+    }
 }
 
 
@@ -410,6 +504,19 @@ function aplicarPermisos() {
     if (menuUsuarios && esMaster()) {
 
         menuUsuarios.style.display = "";
+    }
+
+    if (puedeVerCostos()) {
+
+        const camposCostos =
+            document.getElementById("campos-costos");
+
+        if (camposCostos) camposCostos.style.display = "";
+
+        const cardValor =
+            document.getElementById("card-valor-inventario");
+
+        if (cardValor) cardValor.style.display = "";
     }
 
     if (!esRestringido()) return;
@@ -909,6 +1016,22 @@ if (productoForm) {
                 }
 
 
+                if (puedeVerCostos()) {
+
+                    const costosOk = await guardarCostos(id);
+
+                    if (!costosOk) {
+
+                        await cargarProductos();
+
+                        mensaje.textContent =
+                            "Producto actualizado, pero no se pudo guardar el costo.";
+
+                        return;
+                    }
+                }
+
+
                 mensaje.textContent =
                     "¡Producto actualizado!";
 
@@ -966,6 +1089,23 @@ if (productoForm) {
             );
 
 
+            if (puedeVerCostos() && data && data[0]) {
+
+                const costosOk =
+                    await guardarCostos(data[0].id);
+
+                if (!costosOk) {
+
+                    await cargarProductos();
+
+                    mensaje.textContent =
+                        "Producto guardado, pero no se pudo guardar el costo.";
+
+                    return;
+                }
+            }
+
+
             mensaje.textContent =
                 "¡Producto guardado correctamente!";
 
@@ -992,7 +1132,12 @@ if (productoForm) {
 // CARGAR PRODUCTOS
 // ========================================
 
+let versionTablaProductos = 0;
+
+
 async function cargarProductos() {
+
+    const miVersion = ++versionTablaProductos;
 
     const tabla =
         document.getElementById(
@@ -1006,7 +1151,7 @@ async function cargarProductos() {
 
     tabla.innerHTML = `
         <tr>
-            <td colspan="7" class="empty">
+            <td colspan="9" class="empty">
                 Cargando productos...
             </td>
         </tr>
@@ -1043,7 +1188,7 @@ async function cargarProductos() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="7" class="empty">
+                <td colspan="9" class="empty">
                     Error al cargar productos.
                 </td>
             </tr>
@@ -1057,7 +1202,7 @@ async function cargarProductos() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="7" class="empty">
+                <td colspan="9" class="empty">
                     No hay productos registrados.
                 </td>
             </tr>
@@ -1065,6 +1210,12 @@ async function cargarProductos() {
 
         return;
     }
+
+
+    const costos = await obtenerCostos();
+
+    // Si mientras tanto se pidió otra carga, esta ya quedó vieja
+    if (miVersion !== versionTablaProductos) return;
 
 
     tabla.innerHTML = "";
@@ -1110,6 +1261,19 @@ async function cargarProductos() {
 
 
         fila.dataset.id = producto.id;
+
+
+        const costoProducto = costos[producto.id];
+
+        const costoTexto =
+            costoProducto
+                ? formatoPeso(costoProducto.costo_unitario)
+                : (puedeVerCostos() ? "—" : "");
+
+        const ventaTexto =
+            costoProducto
+                ? formatoPeso(costoProducto.precio_venta)
+                : (puedeVerCostos() ? "—" : "");
 
 
         const acciones =
@@ -1172,6 +1336,14 @@ async function cargarProductos() {
 
             <td class="${claseStock}">
                 ${estado}
+            </td>
+
+            <td>
+                ${costoTexto}
+            </td>
+
+            <td>
+                ${ventaTexto}
             </td>
 
             <td>
@@ -1496,6 +1668,23 @@ async function editarProducto(id) {
     document.getElementById(
         "producto-minimo"
     ).value = data.stock_minimo;
+
+
+    if (puedeVerCostos()) {
+
+        const { data: costoActual } =
+            await supabaseClient
+                .from("producto_costos")
+                .select("costo_unitario, precio_venta")
+                .eq("producto_id", id)
+                .maybeSingle();
+
+        document.getElementById("producto-costo").value =
+            costoActual ? costoActual.costo_unitario : 0;
+
+        document.getElementById("producto-venta").value =
+            costoActual ? costoActual.precio_venta : 0;
+    }
 
 
     document.querySelector(
@@ -2072,6 +2261,37 @@ async function actualizarResumen() {
 
         }
 
+    }
+
+
+    const valorInventario =
+        document.getElementById("valor-inventario");
+
+    if (
+        valorInventario &&
+        puedeVerCostos() &&
+        !errorProductos &&
+        productos
+    ) {
+
+        const costos = await obtenerCostos();
+
+        let totalValor = 0;
+
+        productos.forEach(function(producto) {
+
+            const c = costos[producto.id];
+
+            if (c) {
+
+                totalValor +=
+                    Number(producto.stock_actual) *
+                    Number(c.costo_unitario);
+            }
+        });
+
+        valorInventario.textContent =
+            formatoPeso(Math.round(totalValor));
     }
 
 
@@ -2944,7 +3164,7 @@ async function cargarReportes() {
 
     tabla.innerHTML = `
         <tr>
-            <td colspan="3" class="empty">
+            <td colspan="5" class="empty">
                 Cargando reporte...
             </td>
         </tr>
@@ -2967,7 +3187,7 @@ async function cargarReportes() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="3" class="empty">
+                <td colspan="5" class="empty">
                     Error al cargar el reporte.
                 </td>
             </tr>
@@ -2982,7 +3202,7 @@ async function cargarReportes() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="3" class="empty">
+                <td colspan="5" class="empty">
                     No hay productos para mostrar.
                 </td>
             </tr>
@@ -2993,23 +3213,34 @@ async function cargarReportes() {
     }
 
 
+    const costos = await obtenerCostos();
+
+
     reporteActual =
         data.map(function(producto) {
 
             const { estado } =
                 calcularEstadoProducto(producto);
 
+            const c = costos[producto.id];
+
+            const costoUnit = c ? Number(c.costo_unitario) : 0;
+
             return {
                 producto: producto.nombre,
                 cantidad: producto.stock_actual,
-                estado: estado
+                estado: estado,
+                costo: costoUnit,
+                valor: Number(producto.stock_actual) * costoUnit
             };
         });
 
 
     tabla.innerHTML = "";
 
-    data.forEach(function(producto) {
+    data.forEach(function(producto, indice) {
+
+        const item = reporteActual[indice];
 
         const { estado, clase } =
             calcularEstadoProducto(producto);
@@ -3024,6 +3255,10 @@ async function cargarReportes() {
             <td>${producto.stock_actual}</td>
 
             <td class="${clase}">${estado}</td>
+
+            <td>${formatoPeso(item.costo)}</td>
+
+            <td>${formatoPeso(item.valor)}</td>
 
         `;
 
@@ -3065,7 +3300,9 @@ if (btnExportarExcel) {
                 return {
                     Producto: item.producto,
                     Cantidad: item.cantidad,
-                    Estado: item.estado
+                    Estado: item.estado,
+                    "Costo unitario": item.costo,
+                    "Valor total": item.valor
                 };
             });
 
