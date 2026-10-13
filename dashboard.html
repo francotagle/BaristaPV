@@ -20,7 +20,7 @@
 </head>
 
 
-<body>
+<body class="cargando-rol">
 
 
     <div class="dashboard">
@@ -148,6 +148,16 @@
                     data-section="reportes"
                 >
                     Reportes
+                </button>
+
+
+                <button
+                    class="menu-item"
+                    data-section="usuarios"
+                    id="menu-usuarios"
+                    style="display: none;"
+                >
+                    Usuarios
                 </button>
 
 
@@ -460,10 +470,6 @@
 
 
             <!-- ========================================
-                 ENTRADAS
-            ========================================= -->
-
-            <!-- ========================================
                  86 (LO QUE FALTA O SE ACABA)
             ========================================= -->
 
@@ -521,6 +527,70 @@
                     ></div>
 
                 </div>
+
+            </section>
+
+
+
+            <!-- ========================================
+                 USUARIOS (SOLO MASTER)
+            ========================================= -->
+
+            <section
+                id="section-usuarios"
+                class="dashboard-section section-hidden"
+            >
+
+                <div class="section-header">
+
+                    <h2>
+                        Usuarios
+                    </h2>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="table-container">
+
+                        <table>
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Correo
+                                    </th>
+
+                                    <th>
+                                        Cargo
+                                    </th>
+
+                                    <th>
+                                        Acción
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="usuarios-tabla">
+
+                                <!-- Usuarios cargados por JavaScript -->
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+                <p
+                    id="usuarios-mensaje"
+                    class="usuarios-mensaje"
+                ></p>
 
             </section>
 

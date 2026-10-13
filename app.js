@@ -47,7 +47,7 @@ if (loginForm) {
 
         mensaje.textContent = "Ingresando...";
 
-        const { error } =
+        const { data: datosLogin, error } =
             await supabaseClient.auth.signInWithPassword({
                 email: email,
                 password: password
@@ -63,6 +63,22 @@ if (loginForm) {
             return;
         }
 
+        const cargo =
+            await obtenerCargo(datosLogin.user.id);
+
+        if (cargo.error || !cargo.rol) {
+
+            await supabaseClient.auth.signOut();
+
+            mensaje.textContent =
+                cargo.error
+                    ? "No se pudo verificar tu cargo. Intenta de nuevo."
+                    : "Tu cuenta aún no tiene un cargo asignado. " +
+                      "Pídele al encargado principal que te lo asigne.";
+
+            return;
+        }
+
         mensaje.textContent =
             "¡Inicio de sesión correcto!";
 
@@ -72,6 +88,202 @@ if (loginForm) {
 
         }, 500);
     });
+}
+
+
+// ========================================
+// CARGO (ROL) DEL USUARIO
+// ========================================
+
+let rolUsuario = null;
+
+
+async function obtenerCargo(userId) {
+
+    const { data, error } =
+        await supabaseClient
+            .from("perfiles")
+            .select("rol")
+            .eq("id", userId)
+            .maybeSingle();
+
+    if (error) {
+
+        console.error(
+            "Error obteniendo el cargo:",
+            error
+        );
+
+        return { rol: null, error: error };
+    }
+
+    return {
+        rol: data ? data.rol : null,
+        error: null
+    };
+}
+
+
+function esMaster() {
+
+    return rolUsuario === "master";
+}
+
+
+function esRestringido() {
+
+    return (
+        rolUsuario === "cocina" ||
+        rolUsuario === "barra"
+    );
+}
+
+
+// ========================================
+// CREAR CUENTA (index.html)
+// ========================================
+
+const registroForm =
+    document.getElementById("registro-form");
+
+const loginTabs =
+    document.querySelectorAll(".login-tab");
+
+
+if (registroForm && loginForm) {
+
+    loginTabs.forEach(function(tab) {
+
+        tab.addEventListener("click", function() {
+
+            const verRegistro =
+                tab.dataset.tab === "registro";
+
+            loginTabs.forEach(function(t) {
+
+                t.classList.toggle("active", t === tab);
+
+            });
+
+            registroForm.classList.toggle(
+                "form-oculto",
+                !verRegistro
+            );
+
+            loginForm.classList.toggle(
+                "form-oculto",
+                verRegistro
+            );
+        });
+    });
+
+
+    registroForm.addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            const email =
+                document.getElementById(
+                    "registro-email"
+                ).value.trim();
+
+            const password =
+                document.getElementById(
+                    "registro-password"
+                ).value;
+
+            const password2 =
+                document.getElementById(
+                    "registro-password2"
+                ).value;
+
+            const mensaje =
+                document.getElementById(
+                    "registro-mensaje"
+                );
+
+            if (password.length < 6) {
+
+                mensaje.textContent =
+                    "La contraseña debe tener al menos 6 caracteres.";
+
+                return;
+            }
+
+            if (password !== password2) {
+
+                mensaje.textContent =
+                    "Las contraseñas no coinciden.";
+
+                return;
+            }
+
+            mensaje.textContent = "Creando cuenta...";
+
+            const { data, error } =
+                await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password
+                });
+
+            if (error) {
+
+                console.error(
+                    "Error creando cuenta:",
+                    error
+                );
+
+                mensaje.textContent =
+                    /already|registered/i.test(error.message)
+                        ? "Ese correo ya está registrado."
+                        : "No se pudo crear la cuenta. Intenta de nuevo.";
+
+                return;
+            }
+
+            if (
+                data.user &&
+                data.user.identities &&
+                data.user.identities.length === 0
+            ) {
+
+                mensaje.textContent =
+                    "Ese correo ya está registrado.";
+
+                return;
+            }
+
+            // Aún no tiene cargo: no dejamos la sesión abierta
+            if (data.session) {
+
+                await supabaseClient.auth.signOut();
+            }
+
+            registroForm.reset();
+
+            mensaje.textContent =
+                "¡Cuenta creada! Si te llega un correo para confirmarla, " +
+                "ábrelo. Después el encargado principal debe asignarte " +
+                "un cargo para que puedas entrar.";
+        }
+    );
+}
+
+
+// Avisos al volver desde el dashboard sin acceso
+
+const avisoLogin =
+    new URLSearchParams(window.location.search).get("aviso");
+
+if (avisoLogin && document.getElementById("mensaje")) {
+
+    document.getElementById("mensaje").textContent =
+        avisoLogin === "sin-cargo"
+            ? "Tu cuenta aún no tiene un cargo asignado. " +
+              "Pídele al encargado principal que te lo asigne."
+            : "No se pudo verificar tu cargo. Intenta de nuevo.";
 }
 
 
@@ -104,8 +316,146 @@ async function protegerDashboard() {
     ) {
 
         window.location.href = "dashboard.html";
+
+        return;
+    }
+
+    if (
+        session &&
+        window.location.pathname.includes("dashboard.html")
+    ) {
+
+        await iniciarPermisos(session.user);
     }
 }
+
+
+async function iniciarPermisos(usuario) {
+
+    const cargo = await obtenerCargo(usuario.id);
+
+    if (cargo.error || !cargo.rol) {
+
+        await supabaseClient.auth.signOut();
+
+        window.location.href =
+            "index.html?aviso=" +
+            (cargo.error ? "error" : "sin-cargo");
+
+        return;
+    }
+
+    rolUsuario = cargo.rol;
+
+    aplicarPermisos();
+
+    document.body.classList.remove("cargando-rol");
+}
+
+
+function abrirSeccion(nombre) {
+
+    menuItems.forEach(function(item) {
+
+        item.classList.toggle(
+            "active",
+            item.dataset.section === nombre
+        );
+
+    });
+
+    Object.values(sections).forEach(function(section) {
+
+        if (section) {
+
+            section.classList.add("section-hidden");
+        }
+
+    });
+
+    if (sections[nombre]) {
+
+        sections[nombre].classList.remove("section-hidden");
+    }
+
+    if (nombre === "productos") {
+
+        cargarProductos();
+        cargarCategorias();
+    }
+}
+
+
+function aplicarPermisos() {
+
+    const etiquetas = {
+        master: "Master",
+        admin: "Admin",
+        cocina: "Cocina",
+        barra: "Barra"
+    };
+
+    const encargado =
+        document.querySelector(".encargado");
+
+    if (encargado) {
+
+        encargado.textContent =
+            etiquetas[rolUsuario] || "Encargado";
+    }
+
+    const menuUsuarios =
+        document.getElementById("menu-usuarios");
+
+    if (menuUsuarios && esMaster()) {
+
+        menuUsuarios.style.display = "";
+    }
+
+    if (!esRestringido()) return;
+
+
+    // Cocina y barra: solo Productos (stock actual) y 86
+
+    menuItems.forEach(function(item) {
+
+        const permitido =
+            item.id === "menu-productos" ||
+            item.dataset.section === "86";
+
+        if (!permitido) {
+
+            item.style.display = "none";
+        }
+    });
+
+    const ocultar = [
+        "btn-nuevo-producto",
+        "detalle-desactivar-btn",
+        "detalle-prioridad-btn"
+    ];
+
+    ocultar.forEach(function(id) {
+
+        const el = document.getElementById(id);
+
+        if (el) {
+
+            el.style.display = "none";
+        }
+    });
+
+    const btnDetalleEditar =
+        document.getElementById("detalle-editar-btn");
+
+    if (btnDetalleEditar) {
+
+        btnDetalleEditar.textContent = "Actualizar stock";
+    }
+
+    abrirSeccion("productos");
+}
+
 
 protegerDashboard();
 
@@ -152,6 +502,9 @@ const sections = {
 
     "86":
         document.getElementById("section-86"),
+
+    usuarios:
+        document.getElementById("section-usuarios"),
 
     productos:
         document.getElementById("section-productos"),
@@ -216,6 +569,13 @@ menuItems.forEach(function(button) {
         if (sectionName === "86") {
 
             cargar86();
+
+        }
+
+
+        if (sectionName === "usuarios") {
+
+            cargarUsuarios();
 
         }
 
@@ -425,6 +785,59 @@ if (productoForm) {
                         "producto-minimo"
                     ).value
                 ) || 0;
+
+            if (esRestringido()) {
+
+                if (!id) {
+
+                    mensaje.textContent =
+                        "Tu cargo no puede crear productos.";
+
+                    return;
+                }
+
+                mensaje.textContent =
+                    "Actualizando stock...";
+
+                const { error: errorStock } =
+                    await supabaseClient
+                        .from("productos")
+                        .update({
+                            stock_actual: stock
+                        })
+                        .eq("id", id);
+
+                if (errorStock) {
+
+                    console.error(
+                        "Error actualizando stock:",
+                        errorStock
+                    );
+
+                    mensaje.textContent =
+                        "No se pudo actualizar el stock.";
+
+                    return;
+                }
+
+                mensaje.textContent =
+                    "¡Stock actualizado!";
+
+                await cargarProductos();
+
+                await actualizarResumen();
+
+                setTimeout(function() {
+
+                    modalProducto
+                        .classList
+                        .add("hidden");
+
+                }, 700);
+
+                return;
+            }
+
 
             if (!nombre) {
 
@@ -697,6 +1110,40 @@ async function cargarProductos() {
         fila.dataset.id = producto.id;
 
 
+        const acciones =
+            esRestringido()
+                ? `
+                <button
+                    class="btn-action btn-edit"
+                    onclick="editarProducto(${producto.id})"
+                >
+                    Actualizar stock
+                </button>
+                `
+                : `
+                <button
+                    class="btn-action btn-edit"
+                    onclick="editarProducto(${producto.id})"
+                >
+                    Editar
+                </button>
+
+                <button
+                    class="btn-action btn-delete"
+                    onclick="desactivarProducto(${producto.id})"
+                >
+                    Desactivar
+                </button>
+
+                <button
+                    type="button"
+                    class="prioridad-circulo${producto.prioridad ? " activo" : ""}"
+                    onclick="togglePrioridad(${producto.id}, ${!producto.prioridad})"
+                    title="${producto.prioridad ? "Quitar prioridad" : "Marcar como prioridad"}"
+                ></button>
+                `;
+
+
         fila.innerHTML = `
 
             <td>
@@ -727,26 +1174,7 @@ async function cargarProductos() {
 
             <td>
 
-                <button
-                    class="btn-action btn-edit"
-                    onclick="editarProducto(${producto.id})"
-                >
-                    Editar
-                </button>
-
-                <button
-                    class="btn-action btn-delete"
-                    onclick="desactivarProducto(${producto.id})"
-                >
-                    Desactivar
-                </button>
-
-                <button
-                    type="button"
-                    class="prioridad-circulo${producto.prioridad ? " activo" : ""}"
-                    onclick="togglePrioridad(${producto.id}, ${!producto.prioridad})"
-                    title="${producto.prioridad ? "Quitar prioridad" : "Marcar como prioridad"}"
-                ></button>
+                ${acciones}
 
             </td>
 
@@ -1077,6 +1505,28 @@ async function editarProducto(id) {
     document.getElementById(
         "producto-mensaje"
     ).textContent = "";
+
+
+    const restringido = esRestringido();
+
+    [
+        "producto-nombre",
+        "producto-categoria",
+        "producto-unidad",
+        "producto-minimo"
+    ].forEach(function(campo) {
+
+        document.getElementById(campo).disabled =
+            restringido;
+
+    });
+
+    if (restringido) {
+
+        document.querySelector(
+            "#modal-producto h2"
+        ).textContent = "Actualizar stock";
+    }
 
 
     modalProducto
@@ -3092,4 +3542,162 @@ if (form86) {
         }
 
     }, 30000);
+}
+
+
+// ========================================
+// USUARIOS (SOLO MASTER)
+// ========================================
+
+async function cargarUsuarios() {
+
+    const tabla =
+        document.getElementById("usuarios-tabla");
+
+    const mensaje =
+        document.getElementById("usuarios-mensaje");
+
+    if (!tabla) return;
+
+    mensaje.textContent = "";
+
+    tabla.innerHTML = `
+        <tr>
+            <td colspan="3" class="empty">
+                Cargando usuarios...
+            </td>
+        </tr>
+    `;
+
+    const { data, error } =
+        await supabaseClient
+            .from("perfiles")
+            .select("id, email, rol, created_at")
+            .order("created_at");
+
+    if (error) {
+
+        console.error(
+            "Error cargando usuarios:",
+            error
+        );
+
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="3" class="empty">
+                    No se pudieron cargar los usuarios.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    // Los que esperan cargo van primero
+    data.sort(function(a, b) {
+
+        return (a.rol ? 1 : 0) - (b.rol ? 1 : 0);
+    });
+
+    tabla.innerHTML = "";
+
+    data.forEach(function(usuario) {
+
+        const fila = document.createElement("tr");
+
+        const celdaCorreo = document.createElement("td");
+
+        celdaCorreo.textContent =
+            usuario.email || "(sin correo)";
+
+        const celdaCargo = document.createElement("td");
+
+        const celdaAccion = document.createElement("td");
+
+        if (usuario.rol === "master") {
+
+            celdaCargo.textContent = "Master";
+
+            celdaAccion.textContent = "—";
+
+        } else {
+
+            const selector =
+                document.createElement("select");
+
+            [
+                ["", "Pendiente"],
+                ["admin", "Admin"],
+                ["cocina", "Cocina"],
+                ["barra", "Barra"]
+            ].forEach(function(opcion) {
+
+                const o = document.createElement("option");
+
+                o.value = opcion[0];
+
+                o.textContent = opcion[1];
+
+                selector.appendChild(o);
+
+            });
+
+            selector.value = usuario.rol || "";
+
+            celdaCargo.appendChild(selector);
+
+            const guardar =
+                document.createElement("button");
+
+            guardar.type = "button";
+
+            guardar.className = "btn-action btn-edit";
+
+            guardar.textContent = "Guardar";
+
+            guardar.addEventListener("click", function() {
+
+                guardarCargo(usuario.id, selector.value);
+            });
+
+            celdaAccion.appendChild(guardar);
+        }
+
+        fila.appendChild(celdaCorreo);
+        fila.appendChild(celdaCargo);
+        fila.appendChild(celdaAccion);
+
+        tabla.appendChild(fila);
+    });
+}
+
+
+async function guardarCargo(id, rol) {
+
+    const mensaje =
+        document.getElementById("usuarios-mensaje");
+
+    const { data, error } =
+        await supabaseClient
+            .from("perfiles")
+            .update({ rol: rol || null })
+            .eq("id", id)
+            .select();
+
+    if (error || !data || data.length === 0) {
+
+        console.error(
+            "Error guardando cargo:",
+            error
+        );
+
+        mensaje.textContent =
+            "No se pudo guardar el cargo.";
+
+        return;
+    }
+
+    await cargarUsuarios();
+
+    mensaje.textContent = "Cargo actualizado.";
 }

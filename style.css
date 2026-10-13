@@ -2576,3 +2576,103 @@ select option {
         grid-template-columns: 1fr;
     }
 }
+
+
+/* ========================================
+   LOGIN: CREAR CUENTA
+======================================== */
+
+.login-tabs {
+
+    display: flex;
+
+    gap: 6px;
+
+    margin-bottom: 6px;
+
+    background: #101010;
+
+    border: 1px solid var(--borde);
+
+    border-radius: 8px;
+
+    padding: 4px;
+}
+
+
+.login-tab {
+
+    flex: 1;
+
+    padding: 9px 10px;
+
+    background: transparent;
+
+    color: var(--texto-secundario);
+
+    border-radius: 6px;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.login-tab.active {
+
+    background: var(--rojo);
+
+    color: white;
+}
+
+
+.form-oculto {
+
+    display: none;
+}
+
+
+#registro-mensaje {
+
+    text-align: center;
+
+    margin-top: 15px;
+
+    color: #fca5a5;
+
+    font-size: 13px;
+}
+
+
+.registro-aviso {
+
+    margin: 14px 0 0;
+
+    text-align: center;
+
+    color: var(--texto-secundario);
+
+    font-size: 12px;
+}
+
+
+/* ========================================
+   PERMISOS POR CARGO
+======================================== */
+
+body.cargando-rol .dashboard {
+
+    visibility: hidden;
+}
+
+
+.usuarios-mensaje {
+
+    margin: 12px 0 0;
+
+    color: var(--verde);
+
+    font-size: 14px;
+}
