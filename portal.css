@@ -230,15 +230,81 @@ body {
 }
 
 
+/* Tamaño del logo: cambia solo este número para agrandarlo o achicarlo */
+
+.portal {
+
+    --logo-ancho: 290px;
+}
+
+
 .bar-logo {
 
     display: block;
 
-    width: min(440px, 72%);
+    width: auto;
 
     height: auto;
 
-    transition: transform 0.5s ease;
+    max-width: min(var(--logo-ancho), 62%);
+
+    max-height: 30vh;
+
+    object-fit: contain;
+
+    transition:
+        transform 0.5s ease,
+        filter 0.4s ease;
+}
+
+
+/* Efecto neón rojo al pasar el mouse por el logo de Barista:
+   varias capas de brillo, de cerca a lejos, siguiendo la forma del logo */
+
+.bar-barista .bar-logo:hover {
+
+    filter:
+        drop-shadow(0 0 2px rgba(255, 90, 90, 0.95))
+        drop-shadow(0 0 9px rgba(255, 40, 40, 0.9))
+        drop-shadow(0 0 22px rgba(235, 25, 25, 0.8))
+        drop-shadow(0 0 48px rgba(225, 29, 29, 0.65))
+        drop-shadow(0 0 90px rgba(200, 20, 20, 0.5));
+
+    animation: neon-barista 3.2s ease-in-out infinite;
+}
+
+
+@keyframes neon-barista {
+
+    0%, 100% {
+
+        filter:
+            drop-shadow(0 0 2px rgba(255, 90, 90, 0.95))
+            drop-shadow(0 0 9px rgba(255, 40, 40, 0.9))
+            drop-shadow(0 0 22px rgba(235, 25, 25, 0.8))
+            drop-shadow(0 0 48px rgba(225, 29, 29, 0.65))
+            drop-shadow(0 0 90px rgba(200, 20, 20, 0.5));
+    }
+
+    46% {
+
+        filter:
+            drop-shadow(0 0 2px rgba(255, 90, 90, 0.8))
+            drop-shadow(0 0 7px rgba(255, 40, 40, 0.75))
+            drop-shadow(0 0 16px rgba(235, 25, 25, 0.62))
+            drop-shadow(0 0 36px rgba(225, 29, 29, 0.5))
+            drop-shadow(0 0 70px rgba(200, 20, 20, 0.38));
+    }
+
+    50% {
+
+        filter:
+            drop-shadow(0 0 3px rgba(255, 110, 110, 1))
+            drop-shadow(0 0 11px rgba(255, 50, 50, 1))
+            drop-shadow(0 0 26px rgba(235, 25, 25, 0.9))
+            drop-shadow(0 0 56px rgba(225, 29, 29, 0.75))
+            drop-shadow(0 0 100px rgba(200, 20, 20, 0.6));
+    }
 }
 
 
@@ -393,13 +459,14 @@ body {
         border-top: 1px solid rgba(255, 255, 255, 0.12);
     }
 
+    .portal {
+
+        --logo-ancho: 200px;
+    }
+
     .bar-logo {
 
-        width: min(300px, 62%);
-
-        max-height: 30vh;
-
-        object-fit: contain;
+        max-height: 24vh;
     }
 
     .bar-boton {
@@ -432,7 +499,7 @@ body {
 
     .bar-logo {
 
-        max-height: 22vh;
+        max-height: 19vh;
     }
 
     .bar-boton {
@@ -465,6 +532,11 @@ body {
     .bar:hover .bar-logo {
 
         transform: none;
+    }
+
+    .bar-barista .bar-logo:hover {
+
+        animation: none;
     }
 }
 
