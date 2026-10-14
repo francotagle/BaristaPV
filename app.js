@@ -134,7 +134,9 @@ function esRestringido() {
 
     return (
         rolUsuario === "cocina" ||
-        rolUsuario === "barra"
+        rolUsuario === "barra" ||
+        rolUsuario === "cocina_babilonia" ||
+        rolUsuario === "barra_babilonia"
     );
 }
 
@@ -226,7 +228,7 @@ async function guardarCostos(productoId) {
 
 
 // ========================================
-// CREAR CUENTA (login-barista.html)
+// CREAR CUENTA (login-barista.html y login-babilonia.html)
 // ========================================
 
 const registroForm =
@@ -398,6 +400,7 @@ async function protegerDashboard() {
         (
             window.location.pathname.endsWith("index.html") ||
             window.location.pathname.endsWith("login-barista.html") ||
+            window.location.pathname.endsWith("login-babilonia.html") ||
             window.location.pathname.endsWith("/")
         )
     ) {
@@ -487,7 +490,9 @@ function aplicarPermisos() {
         master: "Master",
         admin: "Admin",
         cocina: "Cocina",
-        barra: "Barra"
+        barra: "Barra",
+        cocina_babilonia: "Cocina Babilonia",
+        barra_babilonia: "Barra Babilonia"
     };
 
     const encargado =
@@ -3882,7 +3887,9 @@ async function cargarUsuarios() {
                 ["", "Pendiente"],
                 ["admin", "Admin"],
                 ["cocina", "Cocina"],
-                ["barra", "Barra"]
+                ["barra", "Barra"],
+                ["cocina_babilonia", "Cocina Babilonia"],
+                ["barra_babilonia", "Barra Babilonia"]
             ].forEach(function(opcion) {
 
                 const o = document.createElement("option");
