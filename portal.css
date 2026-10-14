@@ -315,6 +315,55 @@ body {
 }
 
 
+/* Neón blanco al pasar el mouse por el logo de Babilonia */
+
+.bar-babilonia .bar-logo:hover {
+
+    filter:
+        drop-shadow(0 0 2px rgba(255, 255, 255, 0.95))
+        drop-shadow(0 0 9px rgba(255, 255, 255, 0.85))
+        drop-shadow(0 0 22px rgba(255, 250, 240, 0.7))
+        drop-shadow(0 0 48px rgba(255, 245, 230, 0.5))
+        drop-shadow(0 0 90px rgba(255, 240, 220, 0.35));
+
+    animation: neon-babilonia 3.2s ease-in-out infinite;
+}
+
+
+@keyframes neon-babilonia {
+
+    0%, 100% {
+
+        filter:
+            drop-shadow(0 0 2px rgba(255, 255, 255, 0.95))
+            drop-shadow(0 0 9px rgba(255, 255, 255, 0.85))
+            drop-shadow(0 0 22px rgba(255, 250, 240, 0.7))
+            drop-shadow(0 0 48px rgba(255, 245, 230, 0.5))
+            drop-shadow(0 0 90px rgba(255, 240, 220, 0.35));
+    }
+
+    46% {
+
+        filter:
+            drop-shadow(0 0 2px rgba(255, 255, 255, 0.8))
+            drop-shadow(0 0 7px rgba(255, 255, 255, 0.7))
+            drop-shadow(0 0 16px rgba(255, 250, 240, 0.55))
+            drop-shadow(0 0 36px rgba(255, 245, 230, 0.4))
+            drop-shadow(0 0 70px rgba(255, 240, 220, 0.27));
+    }
+
+    50% {
+
+        filter:
+            drop-shadow(0 0 3px rgba(255, 255, 255, 1))
+            drop-shadow(0 0 11px rgba(255, 255, 255, 0.95))
+            drop-shadow(0 0 26px rgba(255, 250, 240, 0.8))
+            drop-shadow(0 0 56px rgba(255, 245, 230, 0.6))
+            drop-shadow(0 0 100px rgba(255, 240, 220, 0.42));
+    }
+}
+
+
 /* ---------- Botón ---------- */
 
 .bar-boton {
@@ -534,7 +583,8 @@ body {
         transform: none;
     }
 
-    .bar-barista .bar-logo:hover {
+    .bar-barista .bar-logo:hover,
+    .bar-babilonia .bar-logo:hover {
 
         animation: none;
     }
