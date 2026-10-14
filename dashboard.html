@@ -153,6 +153,14 @@
 
                 <button
                     class="menu-item"
+                    data-section="recetario"
+                >
+                    Recetario
+                </button>
+
+
+                <button
+                    class="menu-item"
                     data-section="usuarios"
                     id="menu-usuarios"
                     style="display: none;"
@@ -553,6 +561,69 @@
                     ></div>
 
                 </div>
+
+            </section>
+
+
+
+            <!-- ========================================
+                 RECETARIO (LIBRO)
+            ========================================= -->
+
+            <section
+                id="section-recetario"
+                class="dashboard-section section-hidden"
+            >
+
+                <div class="section-header">
+
+                    <h2>
+                        Recetario
+                    </h2>
+
+                    <div class="libro-controles">
+
+                        <button
+                            type="button"
+                            id="libro-ir-indice"
+                            class="btn-secondary"
+                        >
+                            Índice
+                        </button>
+
+                        <button
+                            type="button"
+                            id="libro-prev"
+                            class="btn-secondary libro-flecha"
+                            aria-label="Página anterior"
+                        >
+                            &#8249;
+                        </button>
+
+                        <span
+                            id="libro-indicador"
+                            class="libro-indicador"
+                        >
+                            1 / 51
+                        </span>
+
+                        <button
+                            type="button"
+                            id="libro-next"
+                            class="btn-secondary libro-flecha"
+                            aria-label="Página siguiente"
+                        >
+                            &#8250;
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="libro"
+                    class="libro"
+                ></div>
 
             </section>
 
@@ -1924,6 +1995,11 @@
     <!-- JAVASCRIPT -->
 
     <script src="app.js"></script>
+
+
+    <!-- RECETARIO (libro de recetas) -->
+
+    <script src="recetario.js"></script>
 
 
     <!-- MENÚ MOBILE (hamburguesa) -->

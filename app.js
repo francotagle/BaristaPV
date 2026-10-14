@@ -612,6 +612,9 @@ const sections = {
     "86":
         document.getElementById("section-86"),
 
+    recetario:
+        document.getElementById("section-recetario"),
+
     usuarios:
         document.getElementById("section-usuarios"),
 
@@ -678,6 +681,13 @@ menuItems.forEach(function(button) {
         if (sectionName === "86") {
 
             cargar86();
+
+        }
+
+
+        if (sectionName === "recetario") {
+
+            iniciarRecetario();
 
         }
 
