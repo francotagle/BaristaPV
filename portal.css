@@ -1,0 +1,581 @@
+/* ========================================
+   PANTALLA DE ENTRADA: BARISTA / BABILONIA
+======================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+}
+
+.portal-body {
+
+    background: #050505;
+
+    color: #fff;
+
+    font-family:
+        "Montserrat",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+
+.portal {
+
+    position: relative;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    min-height: 100vh;
+
+    min-height: 100dvh;
+}
+
+
+/* ---------- Encabezado centrado ---------- */
+
+.portal-cabecera {
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    z-index: 3;
+
+    padding: clamp(18px, 4vh, 42px) 16px 0;
+
+    text-align: center;
+
+    pointer-events: none;
+}
+
+
+.portal-lema {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 14px;
+
+    margin: 0;
+
+    font-size: clamp(9px, 1.4vw, 12px);
+
+    font-weight: 400;
+
+    letter-spacing: 0.3em;
+
+    text-transform: uppercase;
+
+    color: rgba(255, 255, 255, 0.78);
+}
+
+
+.portal-linea {
+
+    flex: 0 1 90px;
+
+    height: 1px;
+
+    background: rgba(255, 255, 255, 0.35);
+}
+
+
+.portal-punto {
+
+    font-size: 10px;
+}
+
+
+.portal-titulo {
+
+    margin: clamp(14px, 3vh, 26px) 0 0;
+
+    font-size: clamp(11px, 1.7vw, 15px);
+
+    font-weight: 500;
+
+    letter-spacing: 0.42em;
+
+    text-transform: uppercase;
+}
+
+
+/* ---------- Cada mitad ---------- */
+
+.bar {
+
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: clamp(26px, 5vh, 52px);
+
+    min-height: 100vh;
+
+    min-height: 100dvh;
+
+    padding: 90px 20px 40px;
+
+    overflow: hidden;
+
+    color: inherit;
+
+    text-decoration: none;
+
+    isolation: isolate;
+}
+
+
+.bar::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -2;
+
+    background-size: cover;
+
+    background-position: center;
+
+    transition:
+        transform 0.9s ease,
+        filter 0.5s ease;
+
+    filter: brightness(0.85);
+}
+
+
+.bar-barista::before {
+
+    background-image: url("imagen/portal-barista.jpg");
+}
+
+
+.bar-babilonia::before {
+
+    background-image: url("imagen/portal-babilonia.jpg");
+}
+
+
+/* Oscurece los bordes para que el logo y el botón destaquen */
+
+.bar::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -1;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            rgba(0, 0, 0, 0) 30%,
+            rgba(0, 0, 0, 0.55) 100%
+        );
+}
+
+
+.bar:hover::before,
+.bar:focus-visible::before {
+
+    transform: scale(1.05);
+
+    filter: brightness(1.05);
+}
+
+
+.bar:focus-visible {
+
+    outline: 2px solid #fff;
+
+    outline-offset: -6px;
+}
+
+
+/* Línea divisoria entre los dos bares */
+
+.bar-babilonia {
+
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+.bar-logo {
+
+    display: block;
+
+    width: min(440px, 72%);
+
+    height: auto;
+
+    transition: transform 0.5s ease;
+}
+
+
+.bar:hover .bar-logo,
+.bar:focus-visible .bar-logo {
+
+    transform: translateY(-4px) scale(1.02);
+}
+
+
+/* ---------- Botón ---------- */
+
+.bar-boton {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 15px 34px;
+
+    border: 1.5px solid currentColor;
+
+    border-radius: 10px;
+
+    background: rgba(0, 0, 0, 0.35);
+
+    font-size: clamp(12px, 1.5vw, 15px);
+
+    font-weight: 500;
+
+    letter-spacing: 0.16em;
+
+    text-transform: uppercase;
+
+    color: #fff;
+
+    transition:
+        background 0.3s ease,
+        color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+
+.bar-flecha {
+
+    font-size: 1.2em;
+
+    transition: transform 0.3s ease;
+}
+
+
+.bar:hover .bar-flecha,
+.bar:focus-visible .bar-flecha {
+
+    transform: translateX(5px);
+}
+
+
+.bar-barista .bar-boton {
+
+    border-color: #e11d1d;
+}
+
+
+.bar-barista .bar-flecha {
+
+    color: #e11d1d;
+}
+
+
+.bar-barista:hover .bar-boton,
+.bar-barista:focus-visible .bar-boton {
+
+    background: #e11d1d;
+
+    box-shadow: 0 8px 30px rgba(225, 29, 29, 0.35);
+}
+
+
+.bar-barista:hover .bar-flecha,
+.bar-barista:focus-visible .bar-flecha {
+
+    color: #fff;
+}
+
+
+.bar-babilonia .bar-boton {
+
+    border-color: #e2c48a;
+
+    color: #f3e6c8;
+}
+
+
+.bar-babilonia .bar-flecha {
+
+    color: #e2c48a;
+}
+
+
+.bar-babilonia:hover .bar-boton,
+.bar-babilonia:focus-visible .bar-boton {
+
+    background: #e2c48a;
+
+    color: #1a1208;
+
+    box-shadow: 0 8px 30px rgba(226, 196, 138, 0.3);
+}
+
+
+.bar-babilonia:hover .bar-flecha,
+.bar-babilonia:focus-visible .bar-flecha {
+
+    color: #1a1208;
+}
+
+
+/* ---------- Celular: una mitad arriba y otra abajo ---------- */
+
+@media (max-width: 760px) {
+
+    .portal {
+
+        grid-template-columns: 1fr;
+
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .bar {
+
+        min-height: 50vh;
+
+        min-height: 50dvh;
+
+        gap: clamp(16px, 3vh, 28px);
+
+        padding: 24px 16px;
+    }
+
+    .bar-barista {
+
+        padding-top: 110px;
+    }
+
+    .bar-babilonia {
+
+        border-left: 0;
+
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .bar-logo {
+
+        width: min(300px, 62%);
+
+        max-height: 30vh;
+
+        object-fit: contain;
+    }
+
+    .bar-boton {
+
+        padding: 12px 24px;
+    }
+
+    .portal-linea {
+
+        display: none;
+    }
+}
+
+
+/* Celulares bajos (por ejemplo 360 x 640): todo cabe sin deslizar */
+
+@media (max-width: 760px) and (max-height: 700px) {
+
+    .bar {
+
+        gap: 14px;
+
+        padding-bottom: 16px;
+    }
+
+    .bar-barista {
+
+        padding-top: 84px;
+    }
+
+    .bar-logo {
+
+        max-height: 22vh;
+    }
+
+    .bar-boton {
+
+        padding: 10px 20px;
+    }
+
+    .portal-cabecera {
+
+        padding-top: 14px;
+    }
+
+    .portal-titulo {
+
+        margin-top: 10px;
+    }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .bar::before,
+    .bar-logo,
+    .bar-flecha {
+
+        transition: none;
+    }
+
+    .bar:hover::before,
+    .bar:hover .bar-logo {
+
+        transform: none;
+    }
+}
+
+
+/* ========================================
+   PÁGINA DE BABILONIA
+======================================== */
+
+.babilonia-pagina {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 100vh;
+
+    min-height: 100dvh;
+
+    padding: 24px 16px;
+
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.7)),
+        url("imagen/portal-babilonia.jpg") center / cover no-repeat;
+}
+
+
+.babilonia-caja {
+
+    width: 100%;
+
+    max-width: 440px;
+
+    padding: 40px 34px 30px;
+
+    text-align: center;
+
+    background: rgba(12, 9, 6, 0.82);
+
+    border: 1px solid rgba(226, 196, 138, 0.28);
+
+    border-top: 3px solid #e2c48a;
+
+    border-radius: 14px;
+
+    -webkit-backdrop-filter: blur(6px);
+
+    backdrop-filter: blur(6px);
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+}
+
+
+.babilonia-caja img {
+
+    display: block;
+
+    width: min(280px, 80%);
+
+    height: auto;
+
+    margin: 0 auto 22px;
+}
+
+
+.babilonia-caja h1 {
+
+    margin: 0 0 10px;
+
+    color: #f3e6c8;
+
+    font-size: 15px;
+
+    font-weight: 500;
+
+    letter-spacing: 0.3em;
+
+    text-transform: uppercase;
+}
+
+
+.babilonia-caja p {
+
+    margin: 0;
+
+    color: rgba(243, 230, 200, 0.72);
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+
+.babilonia-volver {
+
+    display: inline-block;
+
+    margin-top: 26px;
+
+    color: rgba(243, 230, 200, 0.7);
+
+    font-size: 13px;
+
+    text-decoration: none;
+}
+
+
+.babilonia-volver:hover {
+
+    color: #e2c48a;
+}

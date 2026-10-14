@@ -226,7 +226,7 @@ async function guardarCostos(productoId) {
 
 
 // ========================================
-// CREAR CUENTA (index.html)
+// CREAR CUENTA (login-barista.html)
 // ========================================
 
 const registroForm =
@@ -397,6 +397,7 @@ async function protegerDashboard() {
         session &&
         (
             window.location.pathname.endsWith("index.html") ||
+            window.location.pathname.endsWith("login-barista.html") ||
             window.location.pathname.endsWith("/")
         )
     ) {
@@ -425,7 +426,7 @@ async function iniciarPermisos(usuario) {
         await supabaseClient.auth.signOut();
 
         window.location.href =
-            "index.html?aviso=" +
+            "login-barista.html?aviso=" +
             (cargo.error ? "error" : "sin-cargo");
 
         return;
