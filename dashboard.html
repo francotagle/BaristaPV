@@ -567,69 +567,6 @@
 
 
             <!-- ========================================
-                 RECETARIO (LIBRO)
-            ========================================= -->
-
-            <section
-                id="section-recetario"
-                class="dashboard-section section-hidden"
-            >
-
-                <div class="section-header">
-
-                    <h2>
-                        Recetario
-                    </h2>
-
-                    <div class="libro-controles">
-
-                        <button
-                            type="button"
-                            id="libro-ir-indice"
-                            class="btn-secondary"
-                        >
-                            Índice
-                        </button>
-
-                        <button
-                            type="button"
-                            id="libro-prev"
-                            class="btn-secondary libro-flecha"
-                            aria-label="Página anterior"
-                        >
-                            &#8249;
-                        </button>
-
-                        <span
-                            id="libro-indicador"
-                            class="libro-indicador"
-                        >
-                            1 / 51
-                        </span>
-
-                        <button
-                            type="button"
-                            id="libro-next"
-                            class="btn-secondary libro-flecha"
-                            aria-label="Página siguiente"
-                        >
-                            &#8250;
-                        </button>
-
-                    </div>
-
-                </div>
-
-                <div
-                    id="libro"
-                    class="libro"
-                ></div>
-
-            </section>
-
-
-
-            <!-- ========================================
                  USUARIOS (SOLO MASTER)
             ========================================= -->
 
@@ -1995,6 +1932,85 @@
     <!-- JAVASCRIPT -->
 
     <script src="app.js"></script>
+
+
+    <!-- ========================================
+         RECETARIO (VENTANA FLOTANTE)
+    ========================================= -->
+
+    <div
+        id="recetario-overlay"
+        class="libro-overlay"
+    >
+
+        <div
+            class="libro-panel"
+            role="dialog"
+            aria-label="Recetario"
+        >
+
+            <div class="libro-barra">
+
+                <h2>
+                    Recetario
+                </h2>
+
+                <div class="libro-controles">
+
+                    <button
+                        type="button"
+                        id="libro-ir-indice"
+                        class="btn-secondary"
+                    >
+                        Índice
+                    </button>
+
+                    <button
+                        type="button"
+                        id="libro-prev"
+                        class="btn-secondary libro-flecha"
+                        aria-label="Página anterior"
+                    >
+                        &#8249;
+                    </button>
+
+                    <span
+                        id="libro-indicador"
+                        class="libro-indicador"
+                    >
+                        1 / 51
+                    </span>
+
+                    <button
+                        type="button"
+                        id="libro-next"
+                        class="btn-secondary libro-flecha"
+                        aria-label="Página siguiente"
+                    >
+                        &#8250;
+                    </button>
+
+                </div>
+
+                <button
+                    type="button"
+                    id="libro-cerrar"
+                    class="libro-cerrar"
+                    aria-label="Cerrar recetario"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+            <div
+                id="libro"
+                class="libro"
+            ></div>
+
+        </div>
+
+    </div>
 
 
     <!-- RECETARIO (libro de recetas) -->

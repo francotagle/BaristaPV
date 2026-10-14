@@ -983,7 +983,7 @@ function paginaActualRecetario() {
 }
 
 
-function irAPaginaRecetario(numero) {
+function irAPaginaRecetario(numero, instantaneo) {
 
     const libro = document.getElementById("libro");
 
@@ -997,7 +997,7 @@ function irAPaginaRecetario(numero) {
 
     libro.scrollTo({
         left: pag.offsetLeft - (libro.clientWidth - pag.offsetWidth) / 2,
-        behavior: "smooth"
+        behavior: instantaneo ? "auto" : "smooth"
     });
 }
 
@@ -1013,7 +1013,73 @@ function actualizarIndicadorRecetario() {
 }
 
 
-function iniciarRecetario() {
+// Reduce el tamaño del libro lo justo para que la página
+// más alta quepa completa en la ventana, sin tener que bajar
+
+function ajustarEscalaRecetario() {
+
+    const libro = document.getElementById("libro");
+
+    if (!libro || !libro.clientHeight) return;
+
+    const paginas = libro.querySelectorAll(".libro-pagina");
+
+    const estiloLibro = window.getComputedStyle(libro);
+
+    const relleno =
+        parseFloat(estiloLibro.paddingTop) +
+        parseFloat(estiloLibro.paddingBottom);
+
+    const disponible = libro.clientHeight - relleno;
+
+    const alineacionOriginal = libro.style.alignItems;
+
+    // Para medir la altura natural, las páginas no deben estirarse
+    libro.style.alignItems = "flex-start";
+
+    let escala = 1;
+
+    for (let i = 0; i < 5; i++) {
+
+        libro.style.setProperty("--escala", String(escala));
+
+        let maxAlto = 0;
+
+        paginas.forEach(function(p) {
+
+            maxAlto = Math.max(maxAlto, p.offsetHeight);
+        });
+
+        if (!maxAlto) break;
+
+        const nueva = Math.max(
+            0.45,
+            Math.min(1, escala * disponible / maxAlto)
+        );
+
+        if (Math.abs(nueva - escala) < 0.005) {
+
+            escala = nueva;
+
+            break;
+        }
+
+        escala = nueva;
+    }
+
+    // Un pequeño margen para que no quede justo al borde
+    escala = Math.max(0.45, escala * 0.985);
+
+    libro.style.setProperty("--escala", String(escala));
+
+    libro.style.alignItems = alineacionOriginal;
+}
+
+
+let ultimaPaginaRecetario = 1;
+
+
+function construirRecetario() {
 
     if (recetarioListo) return;
 
@@ -1054,6 +1120,10 @@ function iniciarRecetario() {
 
     const btnIndice = document.getElementById("libro-ir-indice");
 
+    const btnCerrar = document.getElementById("libro-cerrar");
+
+    const overlay = document.getElementById("recetario-overlay");
+
     if (btnPrev) {
 
         btnPrev.addEventListener("click", function() {
@@ -1078,16 +1148,25 @@ function iniciarRecetario() {
         });
     }
 
-    // Flechas del teclado mientras el recetario está abierto
+    if (btnCerrar) {
+
+        btnCerrar.addEventListener("click", cerrarRecetario);
+    }
+
+    // Tocar el fondo oscuro también cierra la ventana
+    if (overlay) {
+
+        overlay.addEventListener("click", function(e) {
+
+            if (e.target === overlay) cerrarRecetario();
+        });
+    }
+
     document.addEventListener("keydown", function(e) {
 
-        const seccion = document.getElementById("section-recetario");
+        if (!recetarioAbierto()) return;
 
-        if (!seccion || seccion.classList.contains("section-hidden")) return;
-
-        const tag = (document.activeElement || {}).tagName;
-
-        if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+        if (e.key === "Escape") cerrarRecetario();
 
         if (e.key === "ArrowRight") {
 
@@ -1100,7 +1179,68 @@ function iniciarRecetario() {
         }
     });
 
-    recetarioListo = true;
+    let temporizador = null;
 
-    actualizarIndicadorRecetario();
+    window.addEventListener("resize", function() {
+
+        if (!recetarioAbierto()) return;
+
+        window.clearTimeout(temporizador);
+
+        temporizador = window.setTimeout(function() {
+
+            ajustarEscalaRecetario();
+
+            irAPaginaRecetario(paginaActualRecetario(), true);
+
+        }, 120);
+    });
+
+    recetarioListo = true;
+}
+
+
+function recetarioAbierto() {
+
+    const overlay = document.getElementById("recetario-overlay");
+
+    return !!overlay && overlay.classList.contains("abierto");
+}
+
+
+function abrirRecetario() {
+
+    const overlay = document.getElementById("recetario-overlay");
+
+    if (!overlay) return;
+
+    construirRecetario();
+
+    overlay.classList.add("abierto");
+
+    document.body.classList.add("libro-abierto");
+
+    // Primero se muestra la ventana; luego se mide y se ajusta el tamaño
+    window.requestAnimationFrame(function() {
+
+        ajustarEscalaRecetario();
+
+        irAPaginaRecetario(ultimaPaginaRecetario, true);
+
+        actualizarIndicadorRecetario();
+    });
+}
+
+
+function cerrarRecetario() {
+
+    const overlay = document.getElementById("recetario-overlay");
+
+    if (!overlay) return;
+
+    ultimaPaginaRecetario = paginaActualRecetario();
+
+    overlay.classList.remove("abierto");
+
+    document.body.classList.remove("libro-abierto");
 }
