@@ -1,0 +1,102 @@
+/* ========================================
+   LOGIN DE BABILONIA
+   Mismo diseño que el de Barista, con la foto del local
+   y detalles en verde (como las hojas de la foto)
+======================================== */
+
+.login-babilonia {
+
+    /* Para cambiar el color de los detalles, edita estos dos:
+       verde (actual) o blanco, por ejemplo #ffffff y #e6e6e6 */
+    --acento: #3f8a5b;
+    --acento-hover: #4fa06c;
+    --acento-rgb: 63, 138, 91;
+
+    /* Mismo oscurecido del login de Barista, con tinte verde oscuro.
+       Si quieres ver más la foto, baja estos tres números (0.88 / 0.93 / 0.97). */
+    background-image:
+        radial-gradient(
+            circle at top,
+            rgba(12, 28, 20, 0.88) 0%,
+            rgba(8, 12, 10, 0.93) 45%,
+            rgba(5, 5, 5, 0.97) 100%
+        ),
+        url("imagen/fondo-babilonia.jpg");
+
+    background-size: cover;
+
+    background-position: center;
+}
+
+
+/* Franja superior */
+
+.login-babilonia::before {
+
+    background: var(--acento);
+}
+
+
+/* Tarjeta */
+
+.login-babilonia .login-box {
+
+    border-top-color: var(--acento);
+}
+
+
+/* Pestañas Ingresar / Crear cuenta */
+
+.login-babilonia .login-tab.active {
+
+    background: var(--acento);
+
+    color: #fff;
+}
+
+
+/* Campos al hacer clic */
+
+.login-babilonia .login-box input:focus {
+
+    border-color: var(--acento);
+
+    box-shadow: 0 0 0 3px rgba(var(--acento-rgb), 0.2);
+}
+
+
+/* Botón principal */
+
+.login-babilonia .login-box button[type="submit"] {
+
+    background: var(--acento);
+
+    color: #fff;
+
+    box-shadow: 0 5px 15px rgba(var(--acento-rgb), 0.25);
+}
+
+
+.login-babilonia .login-box button[type="submit"]:hover {
+
+    background: var(--acento-hover);
+
+    box-shadow: 0 7px 20px rgba(var(--acento-rgb), 0.35);
+}
+
+
+/* Mensajes bajo el formulario */
+
+.login-babilonia #mensaje,
+.login-babilonia #registro-mensaje {
+
+    color: #d6e8db;
+}
+
+
+/* Enlace "Elegir otro bar" */
+
+.login-babilonia .login-box a:hover {
+
+    color: #fff !important;
+}
