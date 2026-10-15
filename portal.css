@@ -168,7 +168,7 @@ body {
         transform 0.9s ease,
         filter 0.5s ease;
 
-    filter: brightness(0.85);
+    filter: brightness(1.7);
 }
 
 
@@ -181,6 +181,8 @@ body {
 .bar-babilonia::before {
 
     background-image: url("imagen/portal-babilonia.jpg");
+
+    filter: brightness(0.6);
 }
 
 
@@ -210,7 +212,13 @@ body {
 
     transform: scale(1.05);
 
-    filter: brightness(1.05);
+    filter: brightness(1.9);
+}
+
+.bar-babilonia:hover::before,
+.bar-babilonia:focus-visible::before {
+
+    filter: brightness(0.8);
 }
 
 

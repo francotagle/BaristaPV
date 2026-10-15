@@ -170,9 +170,9 @@ button:active {
     background-image:
         radial-gradient(
             circle at top,
-            rgba(37, 16, 16, 0.88) 0%,
-            rgba(11, 11, 11, 0.93) 45%,
-            rgba(5, 5, 5, 0.97) 100%
+            rgba(37, 16, 16, 0.5) 0%,
+            rgba(11, 11, 11, 0.6) 45%,
+            rgba(5, 5, 5, 0.7) 100%
         ),
         url("imagen/fondologg.jpg");
 
