@@ -528,7 +528,7 @@ function aplicarPermisos() {
     if (!esRestringido()) return;
 
 
-    // Cocina y barra: solo Productos (stock actual) y 86
+    // Cocina y barra: solo Productos (stock actual), Recetario y 86 (botón flotante)
 
     document.body.classList.add("cargo-restringido");
 
@@ -536,7 +536,7 @@ function aplicarPermisos() {
 
         const permitido =
             item.id === "menu-productos" ||
-            item.dataset.section === "86";
+            item.dataset.section === "recetario";
 
         if (!permitido) {
 
@@ -615,8 +615,6 @@ const sections = {
     inicio:
         document.getElementById("section-inicio"),
 
-    "86":
-        document.getElementById("section-86"),
 
     usuarios:
         document.getElementById("section-usuarios"),
@@ -627,8 +625,6 @@ const sections = {
     entradas:
         document.getElementById("section-entradas"),
 
-    salidas:
-        document.getElementById("section-salidas"),
 
     facturas:
         document.getElementById("section-facturas"),
@@ -689,11 +685,6 @@ menuItems.forEach(function(button) {
         }
 
 
-        if (sectionName === "86") {
-
-            cargar86();
-
-        }
 
 
         if (sectionName === "usuarios") {
@@ -1746,467 +1737,495 @@ async function editarProducto(id) {
 
 
 // ========================================
-// ENTRADAS
+// ENTRADAS (LISTA DE INGRESO)
+// Se eligen productos, se arma una lista y al confirmar
+// se registra todo junto y se suma al stock.
 // ========================================
 
-const btnNuevaEntrada =
-    document.getElementById(
-        "btn-nueva-entrada"
-    );
+const ingresoProductoInput =
+    document.getElementById("ingreso-producto");
+const ingresoCantidadInput =
+    document.getElementById("ingreso-cantidad");
+const ingresoListaBody =
+    document.getElementById("ingreso-lista");
+const ingresoMensaje =
+    document.getElementById("ingreso-mensaje");
 
-const modalEntrada =
-    document.getElementById(
-        "modal-entrada"
-    );
+let catalogoIngreso = [];       // productos activos
+let listaIngreso = [];          // lo que se va a ingresar
+let responsableIngreso = "";    // quién registra
 
-const entradaForm =
-    document.getElementById(
-        "entrada-form"
-    );
+function escaparTexto(valor) {
+    return String(valor == null ? "" : valor)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
 
+function nombreDesdeCorreo(correo) {
+    const local = String(correo || "").split("@")[0];
+    if (!local) return "Sin nombre";
+    return local.charAt(0).toUpperCase() + local.slice(1);
+}
 
-// ========================================
-// NUEVA ENTRADA
-// ========================================
+function etiquetaProductoIngreso(producto) {
+    return `${producto.nombre} (${producto.unidad || "un"})`;
+}
 
-if (btnNuevaEntrada) {
-
-    btnNuevaEntrada.addEventListener(
-        "click",
-        async function() {
-
-            entradaForm.reset();
-
-            document.getElementById(
-                "entrada-mensaje"
-            ).textContent = "";
-
-            modalEntrada
-                .classList
-                .remove("hidden");
-
-
-            await cargarProductosParaEntrada();
-
-        }
+function numeroIngreso(valor) {
+    return Number(valor).toLocaleString(
+        "es-CL",
+        { maximumFractionDigits: 2 }
     );
 }
 
-
-// ========================================
-// CARGAR PRODUCTOS PARA ENTRADA
-// ========================================
+function mostrarMensajeIngreso(texto, esError) {
+    if (!ingresoMensaje) return;
+    ingresoMensaje.textContent = texto;
+    ingresoMensaje.classList.toggle("error", !!esError);
+}
 
 async function cargarProductosParaEntrada() {
+    const datalist =
+        document.getElementById("ingreso-productos-lista");
+    if (!datalist) return;
 
-    const select =
-        document.getElementById(
-            "entrada-producto"
-        );
+    const [respuestaProductos, respuestaUsuario] =
+        await Promise.all([
+            supabaseClient
+                .from("productos")
+                .select("id, nombre, unidad, stock_actual")
+                .eq("activo", true)
+                .order("nombre"),
+            supabaseClient.auth.getUser()
+        ]);
 
-
-    if (!select) return;
-
-
-    select.innerHTML = `
-        <option value="">
-            Cargando productos...
-        </option>
-    `;
-
-
-    const { data, error } =
-        await supabaseClient
-            .from("productos")
-            .select(
-                "id, nombre, unidad, stock_actual"
-            )
-            .eq("activo", true)
-            .order("nombre");
-
-
-    if (error) {
-
+    if (respuestaProductos.error) {
         console.error(
-            "Error cargando productos para entrada:",
-            error
+            "Error cargando productos para ingreso:",
+            respuestaProductos.error
         );
-
-
-        select.innerHTML = `
-            <option value="">
-                Error al cargar productos
-            </option>
-        `;
-
+        mostrarMensajeIngreso(
+            "No se pudieron cargar los productos.",
+            true
+        );
         return;
     }
 
+    catalogoIngreso = respuestaProductos.data || [];
 
-    select.innerHTML = `
-        <option value="">
-            Seleccionar producto
-        </option>
-    `;
+    // Si un producto ya está en la lista, refresca su stock mostrado
+    listaIngreso.forEach(function(item) {
+        const actual = catalogoIngreso.find(function(p) {
+            return p.id === item.id;
+        });
+        if (actual) item.stock = Number(actual.stock_actual || 0);
+    });
 
+    datalist.innerHTML = "";
+    catalogoIngreso.forEach(function(producto) {
+        const option = document.createElement("option");
+        option.value = etiquetaProductoIngreso(producto);
+        option.label = `Stock: ${producto.stock_actual}`;
+        datalist.appendChild(option);
+    });
 
-    data.forEach(function(producto) {
+    const usuario =
+        respuestaUsuario.data && respuestaUsuario.data.user;
+    responsableIngreso =
+        usuario ? nombreDesdeCorreo(usuario.email) : "";
+    const quien =
+        document.getElementById("ingreso-responsable");
+    if (quien) {
+        quien.textContent = responsableIngreso || "-";
+    }
 
-        const option =
-            document.createElement("option");
+    renderListaIngreso();
+}
 
+function buscarProductoIngreso(texto) {
+    const buscado = texto.trim().toLowerCase();
+    if (!buscado) return null;
 
-        option.value =
-            producto.id;
+    const exacto = catalogoIngreso.find(function(p) {
+        return etiquetaProductoIngreso(p).toLowerCase() === buscado;
+    });
+    if (exacto) return exacto;
 
+    const porNombre = catalogoIngreso.filter(function(p) {
+        return p.nombre.trim().toLowerCase() === buscado;
+    });
+    return porNombre.length === 1 ? porNombre[0] : null;
+}
 
-        option.textContent =
-            `${producto.nombre} (${producto.unidad}) - Stock: ${producto.stock_actual}`;
+function renderListaIngreso() {
+    if (!ingresoListaBody) return;
 
+    const contador =
+        document.getElementById("ingreso-contador");
+    if (contador) {
+        contador.textContent =
+            listaIngreso.length === 1
+                ? "1 producto"
+                : `${listaIngreso.length} productos`;
+    }
 
-        select.appendChild(option);
+    if (listaIngreso.length === 0) {
+        ingresoListaBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="empty">
+                    Aún no agregas productos a la lista.
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
+    ingresoListaBody.innerHTML = "";
+    listaIngreso.forEach(function(item, indice) {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+            <td>
+                <strong>${escaparTexto(item.nombre)}</strong>
+                <span class="ingreso-unidad">${escaparTexto(item.unidad)}</span>
+            </td>
+            <td>${numeroIngreso(item.stock)}</td>
+            <td>
+                <input
+                    type="number"
+                    class="ingreso-cantidad-fila"
+                    min="0.01"
+                    step="0.01"
+                    value="${item.cantidad}"
+                >
+            </td>
+            <td class="ingreso-stock-nuevo">
+                ${numeroIngreso(item.stock + item.cantidad)}
+            </td>
+            <td>
+                <button
+                    type="button"
+                    class="factura-detalle-quitar"
+                    aria-label="Quitar de la lista"
+                >&times;</button>
+            </td>
+        `;
+
+        const inputCantidad =
+            fila.querySelector(".ingreso-cantidad-fila");
+        inputCantidad.addEventListener("input", function() {
+            const valor = parseFloat(inputCantidad.value);
+            item.cantidad = valor > 0 ? valor : 0;
+            fila.querySelector(".ingreso-stock-nuevo")
+                .textContent =
+                    numeroIngreso(item.stock + item.cantidad);
+        });
+
+        fila.querySelector("button").addEventListener(
+            "click",
+            function() {
+                listaIngreso.splice(indice, 1);
+                renderListaIngreso();
+            }
+        );
+
+        ingresoListaBody.appendChild(fila);
     });
 }
 
-
-// ========================================
-// REGISTRAR ENTRADA
-// ========================================
-
-if (entradaForm) {
-
-    entradaForm.addEventListener(
-        "submit",
-        async function(event) {
-
-            event.preventDefault();
-
-
-            const mensaje =
-                document.getElementById(
-                    "entrada-mensaje"
-                );
-
-
-            mensaje.textContent =
-                "Registrando entrada...";
-
-
-            const productoId =
-                document.getElementById(
-                    "entrada-producto"
-                ).value;
-
-
-            const cantidad =
-                parseFloat(
-                    document.getElementById(
-                        "entrada-cantidad"
-                    ).value
-                );
-
-
-            const proveedor =
-                document.getElementById(
-                    "entrada-proveedor"
-                ).value.trim();
-
-
-            const documento =
-                document.getElementById(
-                    "entrada-documento"
-                ).value.trim();
-
-
-            const observacion =
-                document.getElementById(
-                    "entrada-observacion"
-                ).value.trim();
-
-
-            if (!productoId) {
-
-                mensaje.textContent =
-                    "Selecciona un producto.";
-
-                return;
-            }
-
-
-            if (
-                !cantidad ||
-                cantidad <= 0
-            ) {
-
-                mensaje.textContent =
-                    "Ingresa una cantidad válida.";
-
-                return;
-            }
-
-
-            const { data: producto, error: errorProducto } =
-                await supabaseClient
-                    .from("productos")
-                    .select(
-                        "id, stock_actual"
-                    )
-                    .eq("id", productoId)
-                    .single();
-
-
-            if (errorProducto) {
-
-                console.error(
-                    "Error obteniendo producto:",
-                    errorProducto
-                );
-
-                mensaje.textContent =
-                    "No se pudo obtener el stock actual.";
-
-                return;
-            }
-
-
-            const nuevoStock =
-                Number(producto.stock_actual || 0) +
-                Number(cantidad);
-
-
-            const { error: errorEntrada } =
-                await supabaseClient
-                    .from("entradas")
-                    .insert([{
-
-                        producto_id:
-                            parseInt(productoId),
-
-                        cantidad:
-                            cantidad,
-
-                        proveedor:
-                            proveedor || null,
-
-                        documento:
-                            documento || null,
-
-                        observacion:
-                            observacion || null
-
-                    }]);
-
-
-            if (errorEntrada) {
-
-                console.error(
-                    "Error guardando entrada:",
-                    errorEntrada
-                );
-
-                mensaje.textContent =
-                    "Error al registrar la entrada.";
-
-                return;
-            }
-
-
-            const { error: errorStock } =
-                await supabaseClient
-                    .from("productos")
-                    .update({
-
-                        stock_actual:
-                            nuevoStock
-
-                    })
-                    .eq("id", productoId);
-
-
-            if (errorStock) {
-
-                console.error(
-                    "Error actualizando stock:",
-                    errorStock
-                );
-
-
-                mensaje.textContent =
-                    "La entrada se guardó, pero hubo un error actualizando el stock.";
-
-                return;
-            }
-
-
-            mensaje.textContent =
-                "¡Entrada registrada correctamente!";
-
-
-            await cargarEntradas();
-
-            await cargarProductos();
-
-            await actualizarResumen();
-
-
-            setTimeout(function() {
-
-                modalEntrada
-                    .classList
-                    .add("hidden");
-
-            }, 800);
-
+function agregarAListaIngreso() {
+    mostrarMensajeIngreso("");
+
+    const producto =
+        buscarProductoIngreso(ingresoProductoInput.value);
+    const cantidad =
+        parseFloat(ingresoCantidadInput.value);
+
+    if (!producto) {
+        mostrarMensajeIngreso(
+            "Elige un producto de la lista de sugerencias.",
+            true
+        );
+        return;
+    }
+    if (!cantidad || cantidad <= 0) {
+        mostrarMensajeIngreso(
+            "Ingresa una cantidad válida.",
+            true
+        );
+        return;
+    }
+
+    const existente = listaIngreso.find(function(item) {
+        return item.id === producto.id;
+    });
+    if (existente) {
+        existente.cantidad += cantidad;
+    } else {
+        listaIngreso.push({
+            id: producto.id,
+            nombre: producto.nombre,
+            unidad: producto.unidad || "un",
+            stock: Number(producto.stock_actual || 0),
+            cantidad: cantidad
+        });
+    }
+
+    ingresoProductoInput.value = "";
+    ingresoCantidadInput.value = "";
+    ingresoProductoInput.focus();
+    renderListaIngreso();
+}
+
+const ingresoAgregarBtn =
+    document.getElementById("ingreso-agregar-btn");
+if (ingresoAgregarBtn) {
+    ingresoAgregarBtn.addEventListener(
+        "click",
+        agregarAListaIngreso
+    );
+    [ingresoProductoInput, ingresoCantidadInput].forEach(
+        function(campo) {
+            campo.addEventListener("keydown", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    agregarAListaIngreso();
+                }
+            });
         }
     );
 }
 
+const ingresoVaciarBtn =
+    document.getElementById("ingreso-vaciar-btn");
+if (ingresoVaciarBtn) {
+    ingresoVaciarBtn.addEventListener("click", function() {
+        listaIngreso = [];
+        mostrarMensajeIngreso("");
+        renderListaIngreso();
+    });
+}
+
+const ingresoConfirmarBtn =
+    document.getElementById("ingreso-confirmar-btn");
+if (ingresoConfirmarBtn) {
+    ingresoConfirmarBtn.addEventListener(
+        "click",
+        async function() {
+            const items = listaIngreso.filter(function(item) {
+                return item.cantidad > 0;
+            });
+
+            if (items.length === 0) {
+                mostrarMensajeIngreso(
+                    "Agrega al menos un producto con cantidad.",
+                    true
+                );
+                return;
+            }
+            if (items.length !== listaIngreso.length) {
+                mostrarMensajeIngreso(
+                    "Hay productos con cantidad 0. Corrígelos o quítalos.",
+                    true
+                );
+                return;
+            }
+
+            ingresoConfirmarBtn.disabled = true;
+            mostrarMensajeIngreso("Registrando ingreso...");
+
+            const { error } =
+                await supabaseClient.rpc("registrar_ingreso", {
+                    p_items: items.map(function(item) {
+                        return {
+                            producto_id: item.id,
+                            cantidad: item.cantidad
+                        };
+                    }),
+                    p_proveedor:
+                        document.getElementById("ingreso-proveedor")
+                            .value.trim() || null,
+                    p_documento:
+                        document.getElementById("ingreso-documento")
+                            .value.trim() || null,
+                    p_observacion:
+                        document.getElementById("ingreso-observacion")
+                            .value.trim() || null
+                });
+
+            ingresoConfirmarBtn.disabled = false;
+
+            if (error) {
+                console.error("Error registrando ingreso:", error);
+                const falta =
+                    error.code === "PGRST202" ||
+                    /registrar_ingreso/.test(error.message || "");
+                mostrarMensajeIngreso(
+                    falta
+                        ? "Falta ejecutar entradas_ingresos.sql en Supabase."
+                        : "No se pudo registrar el ingreso: " +
+                          (error.message || "error desconocido"),
+                    true
+                );
+                return;
+            }
+
+            const cantidadProductos = items.length;
+            listaIngreso = [];
+            ["ingreso-proveedor", "ingreso-documento", "ingreso-observacion"]
+                .forEach(function(id) {
+                    document.getElementById(id).value = "";
+                });
+            renderListaIngreso();
+            mostrarMensajeIngreso(
+                cantidadProductos === 1
+                    ? "¡Ingreso registrado! Se actualizó el stock de 1 producto."
+                    : `¡Ingreso registrado! Se actualizó el stock de ${cantidadProductos} productos.`
+            );
+
+            await Promise.all([
+                cargarEntradas(),
+                cargarProductosParaEntrada(),
+                cargarProductos(),
+                actualizarResumen()
+            ]);
+        }
+    );
+}
 
 // ========================================
-// CARGAR ENTRADAS
+// HISTORIAL DE INGRESOS
 // ========================================
-
 async function cargarEntradas() {
-
     const tabla =
-        document.getElementById(
-            "entradas-tabla"
-        );
-
-
+        document.getElementById("entradas-tabla");
     if (!tabla) return;
-
 
     tabla.innerHTML = `
         <tr>
-            <td colspan="6" class="empty">
-                Cargando entradas...
+            <td colspan="5" class="empty">
+                Cargando ingresos...
             </td>
         </tr>
     `;
 
+    const columnas = `
+        id,
+        cantidad,
+        proveedor,
+        documento,
+        observacion,
+        created_at,
+        productos (
+            nombre,
+            unidad
+        )
+    `;
 
-    const { data, error } =
+    let { data, error } =
         await supabaseClient
             .from("entradas")
-            .select(`
-                id,
-                cantidad,
-                proveedor,
-                documento,
-                observacion,
-                created_at,
-                productos (
-                    nombre,
-                    unidad
-                )
-            `)
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            );
-
+            .select(columnas + ", ingreso_id, registrado_por")
+            .order("created_at", { ascending: false })
+            .limit(500);
 
     if (error) {
+        // Si todavía no se ejecutó el SQL nuevo, muestra lo antiguo
+        const respaldo =
+            await supabaseClient
+                .from("entradas")
+                .select(columnas)
+                .order("created_at", { ascending: false })
+                .limit(500);
+        data = respaldo.data;
+        error = respaldo.error;
+    }
 
-        console.error(
-            "Error cargando entradas:",
-            error
-        );
-
-
+    if (error) {
+        console.error("Error cargando entradas:", error);
         tabla.innerHTML = `
             <tr>
-                <td colspan="6" class="empty">
-                    Error al cargar entradas.
+                <td colspan="5" class="empty">
+                    Error al cargar los ingresos.
                 </td>
             </tr>
         `;
-
         return;
     }
-
 
     if (!data || data.length === 0) {
-
         tabla.innerHTML = `
             <tr>
-                <td colspan="6" class="empty">
-                    No hay entradas registradas.
+                <td colspan="5" class="empty">
+                    No hay ingresos registrados.
                 </td>
             </tr>
         `;
-
         return;
     }
 
+    // Agrupa las filas que pertenecen al mismo ingreso
+    const grupos = [];
+    const indice = {};
+    data.forEach(function(entrada) {
+        const clave = entrada.ingreso_id
+            ? "g" + entrada.ingreso_id
+            : "e" + entrada.id;
+        if (!indice[clave]) {
+            indice[clave] = {
+                fecha: entrada.created_at,
+                quien: entrada.registrado_por,
+                proveedor: entrada.proveedor,
+                documento: entrada.documento,
+                observacion: entrada.observacion,
+                items: []
+            };
+            grupos.push(indice[clave]);
+        }
+        indice[clave].items.push(entrada);
+    });
 
     tabla.innerHTML = "";
+    grupos.forEach(function(grupo) {
+        const fecha = new Date(grupo.fecha).toLocaleString(
+            "es-CL",
+            { dateStyle: "short", timeStyle: "short" }
+        );
 
-
-    data.forEach(function(entrada) {
-
-        const fecha =
-            new Date(
-                entrada.created_at
-            ).toLocaleString(
-                "es-CL",
-                {
-                    dateStyle: "short",
-                    timeStyle: "short"
-                }
-            );
-
-
-        const producto =
-            entrada.productos
+        const productos = grupo.items.map(function(entrada) {
+            const nombre = entrada.productos
                 ? entrada.productos.nombre
                 : "Producto eliminado";
+            const unidad = entrada.productos
+                ? entrada.productos.unidad || ""
+                : "";
+            return `
+                <li>
+                    <strong>${escaparTexto(nombre)}</strong>
+                    <span class="ingreso-hist-cant">
+                        +${numeroIngreso(entrada.cantidad)} ${escaparTexto(unidad)}
+                    </span>
+                </li>
+            `;
+        }).join("");
 
+        const proveedorDoc = [grupo.proveedor, grupo.documento]
+            .filter(Boolean)
+            .map(escaparTexto)
+            .join(" · ");
 
-        const fila =
-            document.createElement("tr");
-
-
+        const fila = document.createElement("tr");
         fila.innerHTML = `
-
-            <td>
-                ${fecha}
-            </td>
-
-            <td>
-                <strong>
-                    ${producto}
-                </strong>
-            </td>
-
-            <td>
-                ${entrada.cantidad}
-            </td>
-
-            <td>
-                ${entrada.proveedor || "-"}
-            </td>
-
-            <td>
-                ${entrada.documento || "-"}
-            </td>
-
-            <td>
-                ${entrada.observacion || "-"}
-            </td>
-
+            <td>${fecha}</td>
+            <td>${grupo.quien ? escaparTexto(nombreDesdeCorreo(grupo.quien)) : "-"}</td>
+            <td><ul class="ingreso-hist-lista">${productos}</ul></td>
+            <td>${proveedorDoc || "-"}</td>
+            <td>${escaparTexto(grupo.observacion) || "-"}</td>
         `;
-
-
         tabla.appendChild(fila);
-
     });
 }
-
 
 // ========================================
 // RESUMEN DEL INICIO
@@ -3781,27 +3800,46 @@ if (form86) {
     );
 
 
-    // Contador en el menú al abrir el dashboard,
-    // y refresco cada 30 s mientras la pizarra está visible
-
+    // Contador del botón al abrir el dashboard,
+    // y refresco cada 30 s para que el número esté al día
     cargar86();
-
-    setInterval(function() {
-
-        const seccion =
-            document.getElementById("section-86");
-
-        if (
-            seccion &&
-            !seccion.classList.contains("section-hidden")
-        ) {
-
-            cargar86();
-        }
-
-    }, 30000);
+    setInterval(cargar86, 30000);
 }
 
+// Botón flotante: abre y minimiza la pizarra
+// (app.js carga antes que el botón en dashboard.html, por eso se espera al DOM)
+document.addEventListener("DOMContentLoaded", function() {
+    const p86Boton = document.getElementById("p86-boton");
+    const p86Panel = document.getElementById("p86-panel");
+    const p86Minimizar = document.getElementById("p86-minimizar");
+
+    function alternarPizarra86(abrir) {
+        if (!p86Panel || !p86Boton) return;
+        p86Panel.hidden = !abrir;
+        p86Boton.classList.toggle("abierto", abrir);
+        p86Boton.setAttribute("aria-expanded", abrir ? "true" : "false");
+        if (abrir) {
+            cargar86();
+            if (input86) input86.focus();
+        }
+    }
+
+    if (p86Boton && p86Panel) {
+        p86Boton.addEventListener("click", function() {
+            alternarPizarra86(p86Panel.hidden);
+        });
+        if (p86Minimizar) {
+            p86Minimizar.addEventListener("click", function() {
+                alternarPizarra86(false);
+            });
+        }
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape" && !p86Panel.hidden) {
+                alternarPizarra86(false);
+            }
+        });
+    }
+});
 
 // ========================================
 // USUARIOS (SOLO MASTER)

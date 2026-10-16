@@ -3412,3 +3412,364 @@ body.libro-abierto {
         justify-content: space-between;
     }
 }
+
+/* ========================================
+   FORMULARIOS EN REJILLA (FACTURAS / ENTRADAS)
+======================================== */
+
+.form-seccion {
+    margin: 4px 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--borde);
+    font-size: 13px;
+    color: var(--texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
+}
+
+.campo {
+    min-width: 0;
+}
+
+.campo-completo {
+    grid-column: 1 / -1;
+}
+
+.campo label {
+    display: block;
+    margin-bottom: 6px;
+    color: #d0d0d0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.campo input,
+.campo select {
+    width: 100%;
+}
+
+.factura-detalle-cab {
+    display: grid;
+    grid-template-columns: 2fr 0.8fr 1fr 1fr auto;
+    gap: 8px;
+    padding: 0 0 6px;
+    font-size: 11px;
+    color: var(--texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.factura-detalle-cab span:nth-child(4) {
+    text-align: right;
+}
+
+.factura-detalle-cab span:nth-child(5) {
+    width: 30px;
+}
+
+/* ========================================
+   ENTRADAS: LISTA DE INGRESO
+======================================== */
+
+.ingreso-quien {
+    font-size: 13px;
+    color: var(--texto-secundario);
+}
+
+.ingreso-quien strong {
+    color: white;
+}
+
+.ingreso-agregar {
+    display: grid;
+    grid-template-columns: 1fr 150px auto;
+    gap: 12px;
+    align-items: end;
+    margin-bottom: 20px;
+}
+
+.ingreso-lista-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--texto-secundario);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ingreso-lista-titulo span {
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.ingreso-unidad {
+    margin-left: 6px;
+    font-size: 12px;
+    color: var(--texto-secundario);
+}
+
+.ingreso-cantidad-fila {
+    width: 110px;
+    padding: 8px 10px;
+}
+
+.ingreso-stock-nuevo {
+    font-weight: 700;
+    color: #7bd88f;
+}
+
+.ingreso-datos {
+    margin-top: 20px;
+}
+
+.ingreso-mensaje {
+    min-height: 20px;
+    margin: 14px 0 0;
+    font-size: 14px;
+    color: #7bd88f;
+}
+
+.ingreso-mensaje.error {
+    color: #ff8a8a;
+}
+
+.ingreso-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.ingreso-hist-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ingreso-hist-lista li {
+    padding: 2px 0;
+}
+
+.ingreso-hist-cant {
+    margin-left: 6px;
+    color: #7bd88f;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ingreso-agregar {
+        grid-template-columns: 1fr 110px;
+    }
+
+    .ingreso-agregar .btn-primary {
+        grid-column: 1 / -1;
+    }
+
+    .ingreso-cantidad-fila {
+        width: 84px;
+    }
+
+    .ingreso-acciones {
+        flex-direction: column-reverse;
+    }
+
+    .ingreso-acciones button {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   86: PIZARRA FLOTANTE (BOTÓN + PANEL)
+======================================== */
+
+.p86 {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 150;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.p86-boton {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px 10px 12px;
+    background:
+        linear-gradient(145deg, #2a3832, #1b2420);
+    color: #f1efe6;
+    border: 3px solid #6b4a34;
+    border-radius: 999px;
+    box-shadow:
+        inset 0 0 14px rgba(0, 0, 0, 0.5),
+        0 8px 22px rgba(0, 0, 0, 0.55);
+    cursor: pointer;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.p86-boton:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        inset 0 0 14px rgba(0, 0, 0, 0.5),
+        0 12px 28px rgba(0, 0, 0, 0.6),
+        0 0 0 3px rgba(241, 239, 230, 0.12);
+}
+
+.p86-boton:focus-visible {
+    outline: 2px solid #f1efe6;
+    outline-offset: 3px;
+}
+
+.p86-boton-num {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 2px dashed rgba(241, 239, 230, 0.7);
+    border-radius: 50%;
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.p86-boton-txt {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.p86-boton .menu-badge {
+    position: absolute;
+    top: -9px;
+    right: -6px;
+    margin: 0;
+}
+
+.p86-boton.abierto {
+    background:
+        linear-gradient(145deg, #3a4a42, #25312b);
+}
+
+.p86-panel {
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    max-height: min(70vh, 560px);
+    overflow-y: auto;
+    padding: 16px 18px 18px;
+    background:
+        radial-gradient(
+            circle at 30% 0%,
+            #2b3a34 0%,
+            #1f2a26 60%
+        );
+    border: 8px solid #4a3426;
+    border-radius: 12px;
+    box-shadow:
+        inset 0 0 40px rgba(0, 0, 0, 0.45),
+        0 18px 46px rgba(0, 0, 0, 0.6);
+    animation: p86-abrir 0.18s ease-out;
+}
+
+.p86-panel[hidden] {
+    display: none;
+}
+
+@keyframes p86-abrir {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.p86-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.p86-titulo {
+    color: #f1efe6;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.p86-minimizar {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    color: #f1efe6;
+    border: 1px solid rgba(241, 239, 230, 0.4);
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.p86-minimizar:hover {
+    background: rgba(241, 239, 230, 0.15);
+}
+
+.p86-panel .pizarra-lista {
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+@media (max-width: 700px) {
+
+    .p86 {
+        right: 16px;
+        bottom: 16px;
+    }
+
+    .p86-boton-txt {
+        display: none;
+    }
+
+    .p86-boton {
+        padding: 8px;
+    }
+
+    .p86-panel {
+        width: calc(100vw - 32px);
+        max-height: 65vh;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .p86-panel {
+        animation: none;
+    }
+    .p86-boton {
+        transition: none;
+    }
+}

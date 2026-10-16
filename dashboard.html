@@ -87,17 +87,6 @@
                 </button>
 
 
-                <button
-                    class="menu-item"
-                    data-section="86"
-                    id="menu-86"
-                >
-                    86
-                    <span
-                        class="menu-badge hidden"
-                        id="badge-86"
-                    >0</span>
-                </button>
 
 
                 <div class="menu-group">
@@ -127,12 +116,6 @@
                 </button>
 
 
-                <button
-                    class="menu-item"
-                    data-section="salidas"
-                >
-                    Salidas
-                </button>
 
 
                 <button
@@ -503,66 +486,6 @@
 
 
 
-            <!-- ========================================
-                 86 (LO QUE FALTA O SE ACABA)
-            ========================================= -->
-
-            <section
-                id="section-86"
-                class="dashboard-section section-hidden"
-            >
-
-                <div class="section-header">
-
-                    <h2>
-                        86
-                    </h2>
-
-                </div>
-
-
-                <div class="pizarra">
-
-                    <div class="pizarra-titulo">
-                        Lo que se acabó
-                    </div>
-
-                    <form
-                        id="form-86"
-                        class="pizarra-form"
-                        autocomplete="off"
-                    >
-
-                        <input
-                            type="text"
-                            id="input-86"
-                            placeholder="Ej: Leche de almendras"
-                            maxlength="80"
-                            required
-                        >
-
-                        <button
-                            type="submit"
-                            class="btn-primary"
-                        >
-                            Agregar
-                        </button>
-
-                    </form>
-
-                    <p
-                        id="mensaje-86"
-                        class="pizarra-mensaje"
-                    ></p>
-
-                    <div
-                        id="lista-86"
-                        class="pizarra-lista"
-                    ></div>
-
-                </div>
-
-            </section>
 
 
 
@@ -631,7 +554,7 @@
 
 
             <!-- ========================================
-                 ENTRADAS
+                 ENTRADAS (LISTA DE INGRESO)
             ========================================= -->
 
             <section
@@ -639,185 +562,151 @@
                 class="dashboard-section section-hidden"
             >
 
-
                 <div class="section-header">
-
-
-                    <h2>
-                        Entradas
-                    </h2>
-
-
-                    <button
-                        id="btn-nueva-entrada"
-                        class="btn-primary"
-                    >
-                        Nueva entrada
-                    </button>
-
-
+                    <h2>Entradas</h2>
                 </div>
 
-
-
-                <div class="panel">
-
-
-                    <div class="table-container">
-
-
-                        <table>
-
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        Fecha
-                                    </th>
-
-                                    <th>
-                                        Producto
-                                    </th>
-
-                                    <th>
-                                        Cantidad
-                                    </th>
-
-                                    <th>
-                                        Proveedor
-                                    </th>
-
-                                    <th>
-                                        Documento
-                                    </th>
-
-                                    <th>
-                                        Observación
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody id="entradas-tabla">
-
-                                <!-- Entradas cargadas por JavaScript -->
-
-                            </tbody>
-
-
-                        </table>
-
-
-                    </div>
-
-
-                </div>
-
-
-            </section>
-
-
-
-            <!-- ========================================
-                 SALIDAS
-            ========================================= -->
-
-            <section
-                id="section-salidas"
-                class="dashboard-section section-hidden"
-            >
-
-
-                <div class="section-header">
-
-                    <h2>
-                        Salidas
-                    </h2>
-
-                </div>
-
-
-                <div class="panel">
-
+                <div class="panel ingreso-panel">
 
                     <div class="panel-header">
-
-                        <h2>
-                            Registro de salidas
-                        </h2>
-
+                        <h2>Nuevo ingreso</h2>
+                        <span class="ingreso-quien">
+                            Registra:
+                            <strong id="ingreso-responsable">-</strong>
+                        </span>
                     </div>
 
+                    <div class="ingreso-agregar">
+                        <div class="campo">
+                            <label for="ingreso-producto">Producto</label>
+                            <input
+                                type="text"
+                                id="ingreso-producto"
+                                list="ingreso-productos-lista"
+                                placeholder="Escribe para buscar un producto..."
+                                autocomplete="off"
+                            >
+                            <datalist id="ingreso-productos-lista"></datalist>
+                        </div>
+                        <div class="campo campo-cantidad">
+                            <label for="ingreso-cantidad">Cantidad</label>
+                            <input
+                                type="number"
+                                id="ingreso-cantidad"
+                                min="0.01"
+                                step="0.01"
+                                placeholder="0"
+                            >
+                        </div>
+                        <button
+                            type="button"
+                            id="ingreso-agregar-btn"
+                            class="btn-primary"
+                        >
+                            + Agregar a la lista
+                        </button>
+                    </div>
+
+                    <div class="ingreso-lista-titulo">
+                        Lista de ingreso
+                        <span id="ingreso-contador">0 productos</span>
+                    </div>
 
                     <div class="table-container">
-
-
-                        <table>
-
-
+                        <table class="ingreso-tabla">
                             <thead>
-
                                 <tr>
-
-                                    <th>
-                                        Fecha
-                                    </th>
-
-                                    <th>
-                                        Producto
-                                    </th>
-
-                                    <th>
-                                        Cantidad
-                                    </th>
-
-                                    <th>
-                                        Motivo
-                                    </th>
-
-                                    <th>
-                                        Área
-                                    </th>
-
-                                    <th>
-                                        Observación
-                                    </th>
-
+                                    <th>Producto</th>
+                                    <th>Stock actual</th>
+                                    <th>Cantidad que ingresa</th>
+                                    <th>Stock nuevo</th>
+                                    <th></th>
                                 </tr>
-
                             </thead>
-
-
-                            <tbody>
-
+                            <tbody id="ingreso-lista">
                                 <tr>
-
-                                    <td
-                                        colspan="6"
-                                        class="empty"
-                                    >
-                                        No hay salidas registradas.
+                                    <td colspan="5" class="empty">
+                                        Aún no agregas productos a la lista.
                                     </td>
-
                                 </tr>
-
                             </tbody>
-
-
                         </table>
-
-
                     </div>
 
+                    <div class="form-grid ingreso-datos">
+                        <div class="campo">
+                            <label for="ingreso-proveedor">Proveedor</label>
+                            <input
+                                type="text"
+                                id="ingreso-proveedor"
+                                placeholder="Opcional"
+                            >
+                        </div>
+                        <div class="campo">
+                            <label for="ingreso-documento">N° de factura / guía</label>
+                            <input
+                                type="text"
+                                id="ingreso-documento"
+                                placeholder="Opcional"
+                            >
+                        </div>
+                        <div class="campo campo-completo">
+                            <label for="ingreso-observacion">Observación</label>
+                            <input
+                                type="text"
+                                id="ingreso-observacion"
+                                placeholder="Opcional"
+                            >
+                        </div>
+                    </div>
+
+                    <p id="ingreso-mensaje" class="ingreso-mensaje"></p>
+
+                    <div class="ingreso-acciones">
+                        <button
+                            type="button"
+                            id="ingreso-vaciar-btn"
+                            class="btn-secondary"
+                        >
+                            Vaciar lista
+                        </button>
+                        <button
+                            type="button"
+                            id="ingreso-confirmar-btn"
+                            class="btn-primary"
+                        >
+                            Confirmar ingreso
+                        </button>
+                    </div>
 
                 </div>
 
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Historial de ingresos</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Registrado por</th>
+                                    <th>Productos</th>
+                                    <th>Proveedor / Documento</th>
+                                    <th>Observación</th>
+                                </tr>
+                            </thead>
+                            <tbody id="entradas-tabla">
+                                <!-- Ingresos cargados por JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
             </section>
+
+
+
 
 
 
@@ -1237,153 +1126,8 @@
 
 
 
-    <!-- ========================================
-         MODAL ENTRADA
-    ========================================= -->
-
-    <div
-        id="modal-entrada"
-        class="modal hidden"
-    >
 
 
-        <div class="modal-box">
-
-
-            <div class="modal-header">
-
-
-                <div>
-
-                    <h2>
-                        Nueva entrada
-                    </h2>
-
-                    <p>
-                        Registra el ingreso de productos
-                    </p>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-close="modal-entrada"
-                >
-                    ×
-                </button>
-
-
-            </div>
-
-
-
-            <form id="entrada-form">
-
-
-                <label for="entrada-producto">
-                    Producto
-                </label>
-
-                <select
-                    id="entrada-producto"
-                    required
-                >
-
-                    <option value="">
-                        Seleccionar producto
-                    </option>
-
-                </select>
-
-
-
-                <label for="entrada-cantidad">
-                    Cantidad
-                </label>
-
-                <input
-                    type="number"
-                    id="entrada-cantidad"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="Ej: 10"
-                    required
-                >
-
-
-
-                <label for="entrada-proveedor">
-                    Proveedor
-                </label>
-
-                <input
-                    type="text"
-                    id="entrada-proveedor"
-                    placeholder="Nombre del proveedor"
-                >
-
-
-
-                <label for="entrada-documento">
-                    Documento
-                </label>
-
-                <input
-                    type="text"
-                    id="entrada-documento"
-                    placeholder="Factura, boleta, guía, etc."
-                >
-
-
-
-                <label for="entrada-observacion">
-                    Observación
-                </label>
-
-                <input
-                    type="text"
-                    id="entrada-observacion"
-                    placeholder="Observación opcional"
-                >
-
-
-
-                <p id="entrada-mensaje"></p>
-
-
-
-                <div class="modal-actions">
-
-
-                    <button
-                        type="button"
-                        class="btn-secondary"
-                        data-close="modal-entrada"
-                    >
-                        Cancelar
-                    </button>
-
-
-                    <button
-                        type="submit"
-                        class="btn-primary"
-                    >
-                        Registrar entrada
-                    </button>
-
-
-                </div>
-
-
-            </form>
-
-
-        </div>
-
-
-    </div>
 
 
 
@@ -1432,94 +1176,83 @@
             <form id="factura-form">
 
 
-                <label for="factura-nombre">
-                    Nombre / Razón social
-                </label>
+                <h3 class="form-seccion">Datos del cliente</h3>
 
-                <input
-                    type="text"
-                    id="factura-nombre"
-                    placeholder="Nombre del cliente o empresa"
-                    required
-                >
+                <div class="form-grid">
 
+                    <div class="campo">
+                        <label for="factura-nombre">Nombre / Razón social</label>
+                        <input
+                            type="text"
+                            id="factura-nombre"
+                            placeholder="Nombre del cliente o empresa"
+                            required
+                        >
+                    </div>
 
-                <label for="factura-rut">
-                    RUT
-                </label>
+                    <div class="campo">
+                        <label for="factura-rut">RUT</label>
+                        <input
+                            type="text"
+                            id="factura-rut"
+                            placeholder="Ej: 12.345.678-9"
+                            required
+                        >
+                    </div>
 
-                <input
-                    type="text"
-                    id="factura-rut"
-                    placeholder="Ej: 12.345.678-9"
-                    required
-                >
+                    <div class="campo">
+                        <label for="factura-giro">Giro</label>
+                        <input
+                            type="text"
+                            id="factura-giro"
+                            placeholder="Actividad económica"
+                        >
+                    </div>
 
+                    <div class="campo">
+                        <label for="factura-tipo-giro">Tipo de giro</label>
+                        <input
+                            type="text"
+                            id="factura-tipo-giro"
+                            placeholder="Ej: Restaurante, Distribuidor"
+                        >
+                    </div>
 
-                <label for="factura-giro">
-                    Giro
-                </label>
+                    <div class="campo campo-completo">
+                        <label for="factura-direccion">Dirección</label>
+                        <input
+                            type="text"
+                            id="factura-direccion"
+                            placeholder="Calle y número"
+                        >
+                    </div>
 
-                <input
-                    type="text"
-                    id="factura-giro"
-                    placeholder="Actividad económica"
-                >
+                    <div class="campo">
+                        <label for="factura-comuna">Comuna</label>
+                        <input
+                            type="text"
+                            id="factura-comuna"
+                        >
+                    </div>
 
+                    <div class="campo">
+                        <label for="factura-ciudad">Ciudad</label>
+                        <input
+                            type="text"
+                            id="factura-ciudad"
+                        >
+                    </div>
 
-                <label for="factura-tipo-giro">
-                    Tipo de giro
-                </label>
+                    <div class="campo campo-completo">
+                        <label for="factura-contacto">Contacto</label>
+                        <input
+                            type="text"
+                            id="factura-contacto"
+                            placeholder="Nombre, teléfono o correo"
+                        >
+                    </div>
 
-                <input
-                    type="text"
-                    id="factura-tipo-giro"
-                    placeholder="Ej: Restaurante, Distribuidor, etc."
-                >
-
-
-                <label for="factura-direccion">
-                    Dirección
-                </label>
-
-                <input
-                    type="text"
-                    id="factura-direccion"
-                    placeholder="Calle y número"
-                >
-
-
-                <label for="factura-comuna">
-                    Comuna
-                </label>
-
-                <input
-                    type="text"
-                    id="factura-comuna"
-                >
-
-
-                <label for="factura-ciudad">
-                    Ciudad
-                </label>
-
-                <input
-                    type="text"
-                    id="factura-ciudad"
-                >
-
-
-                <label for="factura-contacto">
-                    Contacto
-                </label>
-
-                <input
-                    type="text"
-                    id="factura-contacto"
-                    placeholder="Nombre, teléfono o correo"
-                >
-
-
+                </div>
 
                 <div class="factura-detalle-header">
 
@@ -1537,6 +1270,14 @@
 
                 </div>
 
+
+                <div class="factura-detalle-cab">
+                    <span>Producto</span>
+                    <span>Cant.</span>
+                    <span>Valor unit.</span>
+                    <span>Subtotal</span>
+                    <span></span>
+                </div>
 
                 <div id="factura-detalle-lista"></div>
 
@@ -1929,9 +1670,84 @@
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
 
-    <!-- JAVASCRIPT -->
+    <!-- ========================================
+         86: PIZARRA FLOTANTE (MINIMIZABLE)
+    ========================================= -->
 
-    <script src="app.js"></script>
+    <div
+        id="p86"
+        class="p86"
+    >
+
+        <div
+            id="p86-panel"
+            class="p86-panel"
+            role="dialog"
+            aria-label="Pizarra 86"
+            hidden
+        >
+
+            <div class="p86-cabecera">
+                <span class="p86-titulo">Lo que se acabó</span>
+                <button
+                    type="button"
+                    id="p86-minimizar"
+                    class="p86-minimizar"
+                    aria-label="Minimizar pizarra"
+                >
+                    &minus;
+                </button>
+            </div>
+
+            <form
+                id="form-86"
+                class="pizarra-form"
+                autocomplete="off"
+            >
+                <input
+                    type="text"
+                    id="input-86"
+                    placeholder="Ej: Leche de almendras"
+                    maxlength="80"
+                    required
+                >
+                <button
+                    type="submit"
+                    class="btn-primary"
+                >
+                    Agregar
+                </button>
+            </form>
+
+            <p
+                id="mensaje-86"
+                class="pizarra-mensaje"
+            ></p>
+
+            <div
+                id="lista-86"
+                class="pizarra-lista"
+            ></div>
+
+        </div>
+
+        <button
+            type="button"
+            id="p86-boton"
+            class="p86-boton"
+            aria-expanded="false"
+            aria-controls="p86-panel"
+        >
+            <span class="p86-boton-num">86</span>
+            <span class="p86-boton-txt">Pizarra</span>
+            <span
+                class="menu-badge hidden"
+                id="badge-86"
+            >0</span>
+        </button>
+
+    </div>
+
 
 
     <!-- ========================================
@@ -2011,6 +1827,11 @@
         </div>
 
     </div>
+
+
+    <!-- JAVASCRIPT (al final, para que todos los elementos de la página ya existan) -->
+
+    <script src="app.js"></script>
 
 
     <!-- RECETARIO (libro de recetas) -->
