@@ -12,6 +12,13 @@
 
     <title>Barista Caffe - Inventario</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
     <link
         rel="stylesheet"
         href="style.css"
@@ -235,6 +242,31 @@
 
                 </div>
 
+
+
+                <!-- AVISO: PRODUCTOS POR REPONER -->
+
+                <div
+                    class="banner-atencion"
+                    id="banner-atencion"
+                    hidden
+                >
+
+                    <div>
+                        <span class="banner-etiqueta">REQUIERE ATENCIÓN</span>
+                        <strong class="banner-titulo" id="banner-titulo"></strong>
+                        <span class="banner-detalle" id="banner-detalle"></span>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-primary"
+                        id="banner-boton"
+                    >
+                        Registrar ingreso
+                    </button>
+
+                </div>
 
 
                 <!-- TARJETAS -->
@@ -1892,6 +1924,28 @@
                 if (seccionProductos) {
                     seccionProductos.classList.remove('section-hidden');
                 }
+            }
+
+            // Cerrar el desplegable de categorías al tocar afuera (escritorio)
+            document.addEventListener('click', function (e) {
+                if (
+                    submenuProductos &&
+                    submenuProductos.classList.contains('open') &&
+                    window.innerWidth > 900 &&
+                    !e.target.closest('.menu-group')
+                ) {
+                    submenuProductos.classList.remove('open');
+                    menuProductos.classList.remove('submenu-open');
+                    submenuProductos.style.maxHeight = '0px';
+                }
+            });
+
+            var bannerBoton = document.getElementById('banner-boton');
+            if (bannerBoton) {
+                bannerBoton.addEventListener('click', function () {
+                    var entradas = document.querySelector('[data-section="entradas"]');
+                    if (entradas) entradas.click();
+                });
             }
 
             if (menuProductos && submenuProductos) {

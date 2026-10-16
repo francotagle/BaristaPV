@@ -420,6 +420,56 @@ async function protegerDashboard() {
 }
 
 
+// ========================================
+// MARCA: LOGO SEGÚN EL BAR
+// cocina/barra de Babilonia: siempre Babilonia.
+// master/admin: el bar por el que entraron al sistema.
+// ========================================
+
+function barActual() {
+
+    if (
+        rolUsuario === "cocina_babilonia" ||
+        rolUsuario === "barra_babilonia"
+    ) {
+        return "babilonia";
+    }
+
+    if (rolUsuario === "cocina" || rolUsuario === "barra") {
+        return "barista";
+    }
+
+    try {
+        return localStorage.getItem("bar") === "babilonia"
+            ? "babilonia"
+            : "barista";
+    } catch (e) {
+        return "barista";
+    }
+}
+
+
+function aplicarMarca() {
+
+    const babilonia = barActual() === "babilonia";
+
+    document.body.classList.toggle("bar-babilonia", babilonia);
+
+    if (!babilonia) return;
+
+    document
+        .querySelectorAll(
+            ".logo-barista, .mobile-logo, .topbar-hero-logo-plano"
+        )
+        .forEach(function(img) {
+            img.src = "imagen/LogoBabilonia.png";
+            img.alt = "Babilonia Bar";
+        });
+
+    document.title = "Babilonia Bar - Inventario";
+}
+
+
 async function iniciarPermisos(usuario) {
 
     const cargo = await obtenerCargo(usuario.id);
@@ -436,6 +486,8 @@ async function iniciarPermisos(usuario) {
     }
 
     rolUsuario = cargo.rol;
+
+    aplicarMarca();
 
     aplicarPermisos();
 
@@ -2231,6 +2283,48 @@ async function cargarEntradas() {
 // RESUMEN DEL INICIO
 // ========================================
 
+// Aviso de "productos por reponer" en el Inicio
+function actualizarBannerAtencion(stockBajo, agotados) {
+
+    const banner = document.getElementById("banner-atencion");
+
+    if (!banner) return;
+
+    if (stockBajo === 0 || esRestringido()) {
+
+        banner.hidden = true;
+
+        return;
+    }
+
+    const bajoSolo = stockBajo - agotados;
+
+    document.getElementById("banner-titulo").textContent =
+        stockBajo === 1
+            ? "1 producto por reponer"
+            : stockBajo + " productos por reponer";
+
+    const partes = [];
+
+    if (agotados > 0) {
+        partes.push(
+            agotados === 1
+                ? "1 agotado"
+                : agotados + " agotados"
+        );
+    }
+
+    if (bajoSolo > 0) {
+        partes.push(bajoSolo + " bajo el mínimo");
+    }
+
+    document.getElementById("banner-detalle").textContent =
+        partes.join(" · ");
+
+    banner.hidden = false;
+}
+
+
 async function actualizarResumen() {
 
     const totalProductos =
@@ -2293,6 +2387,19 @@ async function actualizarResumen() {
                 stockBajo;
 
         }
+
+
+        const agotados =
+            productos.filter(function(producto) {
+
+                return Number(producto.stock_actual) <= 0;
+
+            }).length;
+
+        actualizarBannerAtencion(
+            stockBajo,
+            agotados
+        );
 
     }
 

@@ -3773,3 +3773,229 @@ body.libro-abierto {
         transition: none;
     }
 }
+
+/* ========================================
+   ESTILO B: BARRA SUPERIOR OSCURA
+======================================== */
+
+body {
+    font-family:
+        "Space Grotesk",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+.card {
+    background: #17171a;
+    border: 1px solid #26262b;
+    border-radius: 14px;
+    box-shadow: none;
+}
+
+.card::after {
+    display: none;
+}
+
+.card .number {
+    font-size: 34px;
+    letter-spacing: -1px;
+}
+
+.panel {
+    background: #17171a;
+    border-color: #26262b;
+    border-radius: 14px;
+    box-shadow: none;
+}
+
+/* Aviso de productos por reponer (Inicio) */
+
+.banner-atencion {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 22px 26px;
+    border-radius: 16px;
+    border: 1px solid #3a1d1b;
+    background: linear-gradient(100deg, #2a1514 0%, #17171a 70%);
+}
+
+.banner-atencion[hidden] {
+    display: none;
+}
+
+.banner-etiqueta {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    color: #ff8a84;
+}
+
+.banner-titulo {
+    display: block;
+    font-size: 26px;
+    letter-spacing: -0.5px;
+    color: #fff;
+}
+
+.banner-detalle {
+    display: block;
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--texto-secundario);
+}
+
+/* Escritorio: el menú pasa arriba, en una barra */
+
+@media (min-width: 901px) {
+
+    .dashboard {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: sticky;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: auto;
+        width: 100%;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        padding: 10px 36px;
+        padding-right: 300px;
+        background: #121214;
+        border-right: 0;
+        border-bottom: 1px solid #26262b;
+    }
+
+    .sidebar-header {
+        height: auto;
+        padding: 0;
+        border: 0;
+        flex-shrink: 0;
+    }
+
+    .sidebar-header img {
+        width: auto;
+        max-width: 190px;
+        max-height: 56px;
+    }
+
+    .sidebar-menu {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+        padding: 0;
+    }
+
+    .menu-item {
+        width: auto;
+        margin: 0;
+        padding: 9px 16px;
+        border-radius: 8px;
+        white-space: nowrap;
+    }
+
+    .menu-item.active {
+        background: #26262b;
+        color: #fff;
+    }
+
+    .menu-item.active::before {
+        display: none;
+    }
+
+    /* Categorías de Productos: desplegable flotante */
+
+    .menu-group {
+        position: relative;
+    }
+
+    .menu-arrow {
+        margin-left: 8px;
+    }
+
+    .submenu {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        min-width: 220px;
+        padding: 0 6px;
+        background: #17171a;
+        border: 1px solid #26262b;
+        border-radius: 12px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+        z-index: 200;
+    }
+
+    .submenu:not(.open) {
+        border-width: 0;
+        background: none;
+        box-shadow: none;
+    }
+
+    .cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .card {
+        min-height: 120px;
+    }
+
+    .submenu.open {
+        padding: 6px;
+    }
+
+    .submenu-item {
+        padding: 10px 14px;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 28px 36px;
+    }
+
+    /* Usuario y "Cerrar sesión" quedan a la derecha de la barra */
+
+    .topbar-hero {
+        position: fixed;
+        top: 0;
+        right: 0;
+        z-index: 101;
+        width: auto;
+        height: 76px;
+        margin: 0;
+        padding: 0 36px;
+        overflow: visible;
+        border-radius: 0;
+        background: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .topbar-hero::before,
+    .topbar-hero-content {
+        display: none;
+    }
+
+    .topbar-hero-user {
+        position: static;
+    }
+}
+
+body.cargo-restringido .banner-atencion {
+    display: none;
+}
