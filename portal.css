@@ -168,7 +168,7 @@ body {
         transform 0.9s ease,
         filter 0.5s ease;
 
-    filter: brightness(1.7);
+    filter: brightness(1.45);
 }
 
 
@@ -182,7 +182,7 @@ body {
 
     background-image: url("imagen/portal-babilonia.jpg");
 
-    filter: brightness(0.35);
+    filter: brightness(0.8);
 }
 
 
@@ -201,8 +201,8 @@ body {
     background:
         radial-gradient(
             ellipse at center,
-            rgba(0, 0, 0, 0) 30%,
-            rgba(0, 0, 0, 0.55) 100%
+            rgba(0, 0, 0, 0) 45%,
+            rgba(0, 0, 0, 0.25) 100%
         );
 }
 
@@ -212,13 +212,13 @@ body {
 
     transform: scale(1.05);
 
-    filter: brightness(1.9);
+    filter: brightness(1.7);
 }
 
 .bar-babilonia:hover::before,
 .bar-babilonia:focus-visible::before {
 
-    filter: brightness(0.5);
+    filter: brightness(1);
 }
 
 
@@ -325,9 +325,20 @@ body {
 
 /* Neón blanco al pasar el mouse por el logo de Babilonia */
 
+/* El logo de Babilonia es de colores oscuros: se aclara para que se
+   lea sobre la foto (cambia 2.4 para más o menos luz) */
+
+.bar-babilonia .bar-logo {
+    --aclarar: brightness(2.4) saturate(1.15);
+    filter:
+        var(--aclarar)
+        drop-shadow(0 0 14px rgba(226, 196, 138, 0.22));
+}
+
 .bar-babilonia .bar-logo:hover {
 
     filter:
+        var(--aclarar)
         drop-shadow(0 0 2px rgba(255, 255, 255, 0.95))
         drop-shadow(0 0 9px rgba(255, 255, 255, 0.85))
         drop-shadow(0 0 22px rgba(255, 250, 240, 0.7))
@@ -343,6 +354,7 @@ body {
     0%, 100% {
 
         filter:
+            var(--aclarar)
             drop-shadow(0 0 2px rgba(255, 255, 255, 0.95))
             drop-shadow(0 0 9px rgba(255, 255, 255, 0.85))
             drop-shadow(0 0 22px rgba(255, 250, 240, 0.7))
@@ -353,6 +365,7 @@ body {
     46% {
 
         filter:
+            var(--aclarar)
             drop-shadow(0 0 2px rgba(255, 255, 255, 0.8))
             drop-shadow(0 0 7px rgba(255, 255, 255, 0.7))
             drop-shadow(0 0 16px rgba(255, 250, 240, 0.55))
@@ -363,6 +376,7 @@ body {
     50% {
 
         filter:
+            var(--aclarar)
             drop-shadow(0 0 3px rgba(255, 255, 255, 1))
             drop-shadow(0 0 11px rgba(255, 255, 255, 0.95))
             drop-shadow(0 0 26px rgba(255, 250, 240, 0.8))
