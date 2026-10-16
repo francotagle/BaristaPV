@@ -100,3 +100,13 @@
 
     color: #fff !important;
 }
+
+/* Logo de Babilonia: sus colores son oscuros, así que se aclara un poco
+   y lleva un resplandor blanco suave (cambia 2.2 para más o menos luz) */
+.login-babilonia .logo-login {
+    filter:
+        brightness(2.2)
+        saturate(1.15)
+        drop-shadow(0 0 10px rgba(255, 255, 255, 0.4))
+        drop-shadow(0 0 26px rgba(255, 255, 255, 0.22));
+}

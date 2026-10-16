@@ -2097,12 +2097,8 @@ if (ingresoConfirmarBtn) {
                             cantidad: item.cantidad
                         };
                     }),
-                    p_proveedor:
-                        document.getElementById("ingreso-proveedor")
-                            .value.trim() || null,
-                    p_documento:
-                        document.getElementById("ingreso-documento")
-                            .value.trim() || null,
+                    p_proveedor: null,
+                    p_documento: null,
                     p_observacion:
                         document.getElementById("ingreso-observacion")
                             .value.trim() || null
@@ -2127,7 +2123,7 @@ if (ingresoConfirmarBtn) {
 
             const cantidadProductos = items.length;
             listaIngreso = [];
-            ["ingreso-proveedor", "ingreso-documento", "ingreso-observacion"]
+            ["ingreso-observacion"]
                 .forEach(function(id) {
                     document.getElementById(id).value = "";
                 });
@@ -2158,7 +2154,7 @@ async function cargarEntradas() {
 
     tabla.innerHTML = `
         <tr>
-            <td colspan="5" class="empty">
+            <td colspan="4" class="empty">
                 Cargando ingresos...
             </td>
         </tr>
@@ -2200,7 +2196,7 @@ async function cargarEntradas() {
         console.error("Error cargando entradas:", error);
         tabla.innerHTML = `
             <tr>
-                <td colspan="5" class="empty">
+                <td colspan="4" class="empty">
                     Error al cargar los ingresos.
                 </td>
             </tr>
@@ -2211,7 +2207,7 @@ async function cargarEntradas() {
     if (!data || data.length === 0) {
         tabla.innerHTML = `
             <tr>
-                <td colspan="5" class="empty">
+                <td colspan="4" class="empty">
                     No hay ingresos registrados.
                 </td>
             </tr>
@@ -2264,17 +2260,12 @@ async function cargarEntradas() {
             `;
         }).join("");
 
-        const proveedorDoc = [grupo.proveedor, grupo.documento]
-            .filter(Boolean)
-            .map(escaparTexto)
-            .join(" · ");
 
         const fila = document.createElement("tr");
         fila.innerHTML = `
             <td>${fecha}</td>
             <td>${grupo.quien ? escaparTexto(nombreDesdeCorreo(grupo.quien)) : "-"}</td>
             <td><ul class="ingreso-hist-lista">${productos}</ul></td>
-            <td>${proveedorDoc || "-"}</td>
             <td>${escaparTexto(grupo.observacion) || "-"}</td>
         `;
         tabla.appendChild(fila);

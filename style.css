@@ -4395,3 +4395,12 @@ body.bar-babilonia #badge-86 {
         width: 100%;
     }
 }
+
+/* Resplandor suave detrás del logo en las pantallas de ingreso:
+   rojo en Barista (los logos se veían opacos) */
+
+.login-container .logo-login {
+    filter:
+        drop-shadow(0 0 10px rgba(229, 57, 53, 0.45))
+        drop-shadow(0 0 26px rgba(198, 40, 40, 0.3));
+}
