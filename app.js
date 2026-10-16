@@ -580,7 +580,7 @@ function aplicarPermisos() {
     if (!esRestringido()) return;
 
 
-    // Cocina y barra: solo Productos (stock actual), Recetario y 86 (botón flotante)
+    // Cocina y barra: Productos (stock actual), Recetario, Reportes y 86 (botón flotante)
 
     document.body.classList.add("cargo-restringido");
 
@@ -588,7 +588,8 @@ function aplicarPermisos() {
 
         const permitido =
             item.id === "menu-productos" ||
-            item.dataset.section === "recetario";
+            item.dataset.section === "recetario" ||
+            item.dataset.section === "reportes";
 
         if (!permitido) {
 
@@ -597,6 +598,7 @@ function aplicarPermisos() {
     });
 
     const ocultar = [
+        "btn-enviar-reporte",
         "btn-nuevo-producto",
         "detalle-desactivar-btn",
         "detalle-prioridad-btn"
@@ -3437,13 +3439,19 @@ if (btnExportarExcel) {
         const filas =
             reporteActual.map(function(item) {
 
-                return {
+                const fila = {
                     Producto: item.producto,
                     Cantidad: item.cantidad,
-                    Estado: item.estado,
-                    "Costo unitario": item.costo,
-                    "Valor total": item.valor
+                    Estado: item.estado
                 };
+
+                // Los costos solo los ven master y admin
+                if (puedeVerCostos()) {
+                    fila["Costo unitario"] = item.costo;
+                    fila["Valor total"] = item.valor;
+                }
+
+                return fila;
             });
 
         const hoja =

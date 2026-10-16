@@ -3999,3 +3999,140 @@ body {
 body.cargo-restringido .banner-atencion {
     display: none;
 }
+
+/* ========================================
+   REPORTES PARA COCINA / BARRA
+   (sin columnas de costo ni valor)
+======================================== */
+
+body.cargo-restringido #section-reportes th:nth-child(4),
+body.cargo-restringido #section-reportes td:nth-child(4),
+body.cargo-restringido #section-reportes th:nth-child(5),
+body.cargo-restringido #section-reportes td:nth-child(5) {
+    display: none;
+}
+
+
+/* ========================================
+   TEMA BABILONIA: VERDE (distinto al de Barista)
+   Para cambiar el verde por otro color, editar
+   las 4 variables de la primera regla.
+======================================== */
+
+body.bar-babilonia {
+
+    --rojo: #3f8a5b;
+    --rojo-hover: #5bb47f;
+    --rojo-oscuro: #2d6b45;
+    --acento-rgb: 63, 138, 91;
+
+    --negro: #070b09;
+    --negro-suave: #0b100d;
+    --negro-panel: #0f1512;
+    --negro-hover: #17201b;
+    --borde: #1f2c25;
+
+    font-family:
+        "Jost",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+/* Fondo: la foto del local muy oscurecida, como en el login */
+
+body.bar-babilonia .dashboard {
+    background: var(--negro);
+}
+
+body.bar-babilonia .main-content {
+    background:
+        linear-gradient(
+            rgba(7, 11, 9, 0.93),
+            rgba(7, 11, 9, 0.96)
+        ),
+        url("imagen/fondo-babilonia.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+body.bar-babilonia .sidebar {
+    background: #09100c;
+    border-color: var(--borde);
+}
+
+body.bar-babilonia .card,
+body.bar-babilonia .panel {
+    background: rgba(15, 21, 18, 0.92);
+    border-color: var(--borde);
+}
+
+body.bar-babilonia .menu-item.active {
+    background: rgba(var(--acento-rgb), 0.22);
+    color: #fff;
+}
+
+body.bar-babilonia .menu-item:hover {
+    color: #fff;
+}
+
+/* Los botones y los números de alerta conservan lectura clara */
+
+body.bar-babilonia .btn-primary {
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(var(--acento-rgb), 0.25);
+}
+
+body.bar-babilonia .btn-primary:hover {
+    box-shadow: 0 6px 18px rgba(var(--acento-rgb), 0.35);
+}
+
+body.bar-babilonia #logout-btn {
+    background: rgba(var(--acento-rgb), 0.14);
+    color: #9ed8b6;
+    border-color: rgba(var(--acento-rgb), 0.4);
+}
+
+body.bar-babilonia #logout-btn:hover {
+    background: var(--rojo);
+    color: #fff;
+    border-color: var(--rojo);
+    box-shadow: 0 5px 15px rgba(var(--acento-rgb), 0.3);
+}
+
+body.bar-babilonia select:focus,
+body.bar-babilonia input:focus,
+body.bar-babilonia textarea:focus {
+    border-color: var(--rojo);
+    box-shadow: 0 0 0 3px rgba(var(--acento-rgb), 0.2);
+}
+
+body.bar-babilonia .banner-atencion {
+    border-color: #28402f;
+    background: linear-gradient(100deg, #15271c 0%, #0f1512 70%);
+}
+
+body.bar-babilonia .banner-etiqueta {
+    color: #8fd1ab;
+}
+
+body.bar-babilonia .modal-box {
+    border-top-color: var(--rojo);
+}
+
+/* Lo que significa "mal" sigue en rojo: stock bajo, agotado, avisos */
+
+body.bar-babilonia .card .number.red {
+    color: #ef6b63;
+}
+
+body.bar-babilonia .card-stock-bajo .card-link {
+    color: #ef6b63;
+}
+
+body.bar-babilonia .p86-boton .menu-badge,
+body.bar-babilonia #badge-86 {
+    background: #c62828;
+}
