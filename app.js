@@ -575,6 +575,11 @@ function aplicarPermisos() {
             document.getElementById("card-valor-inventario");
 
         if (cardValor) cardValor.style.display = "";
+
+        const cardVenta =
+            document.getElementById("card-valor-venta");
+
+        if (cardVenta) cardVenta.style.display = "";
     }
 
     if (!esRestringido()) return;
@@ -2400,8 +2405,11 @@ async function actualizarResumen() {
     const valorInventario =
         document.getElementById("valor-inventario");
 
+    const valorVenta =
+        document.getElementById("valor-venta");
+
     if (
-        valorInventario &&
+        (valorInventario || valorVenta) &&
         puedeVerCostos() &&
         !errorProductos &&
         productos
@@ -2409,7 +2417,8 @@ async function actualizarResumen() {
 
         const costos = await obtenerCostos();
 
-        let totalValor = 0;
+        let totalCosto = 0;
+        let totalVenta = 0;
 
         productos.forEach(function(producto) {
 
@@ -2417,14 +2426,22 @@ async function actualizarResumen() {
 
             if (c) {
 
-                totalValor +=
-                    Number(producto.stock_actual) *
-                    Number(c.costo_unitario);
+                const stock = Number(producto.stock_actual);
+
+                totalCosto += stock * Number(c.costo_unitario);
+                totalVenta += stock * Number(c.precio_venta);
             }
         });
 
-        valorInventario.textContent =
-            formatoPeso(Math.round(totalValor));
+        if (valorInventario) {
+            valorInventario.textContent =
+                formatoPeso(Math.round(totalCosto));
+        }
+
+        if (valorVenta) {
+            valorVenta.textContent =
+                formatoPeso(Math.round(totalVenta));
+        }
     }
 
 

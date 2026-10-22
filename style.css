@@ -4270,10 +4270,6 @@ body.bar-babilonia #badge-86 {
         gap: 12px;
     }
 
-    .cards .card:last-child {
-        grid-column: 1 / -1;
-    }
-
     .card {
         min-height: 104px;
         padding: 16px;
