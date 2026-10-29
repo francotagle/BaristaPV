@@ -1680,7 +1680,7 @@ async function guardarReceta(e) {
             const { error: errSubida } = await supabaseClient
                 .storage
                 .from("recetas")
-                .upload(ruta, blob, { contentType: "image/jpeg", upsert: true });
+                .upload(ruta, blob, { contentType: "image/jpeg" });
 
             if (errSubida) throw errSubida;
 
