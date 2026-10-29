@@ -3633,18 +3633,20 @@ function construirTablaHtmlReporte() {
 
     const estilo = "padding:4px 8px;border:1px solid #ddd;";
 
-    // Solo se envían por correo los productos que requieren atención
-    // (Stock bajo / Agotado); el inventario completo ya se ve en el panel.
+    // Se envía el inventario completo; los productos con stock bajo
+    // o agotados van primero.
     const items =
-        reporteActual.filter(function(item) {
-            return item.estado !== "Normal";
+        reporteActual.slice().sort(function(x, y) {
+            const px = x.estado === "Normal" ? 1 : 0;
+            const py = y.estado === "Normal" ? 1 : 0;
+            return px - py;
         });
 
     if (items.length === 0) {
 
         return (
             "<p style=\"font-family:sans-serif;font-size:14px;\">" +
-            "No hay productos con stock bajo o agotado por el momento." +
+            "No hay productos para mostrar por el momento." +
             "</p>"
         );
     }
