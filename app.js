@@ -3631,7 +3631,17 @@ async function guardarCorreoUsado(email) {
 
 function construirTablaHtmlReporte() {
 
-    const estilo = "padding:4px 8px;border:1px solid #ddd;";
+    // EmailJS limita las variables a 50 KB: se usa HTML compacto
+    // (sin estilos en cada celda) y se corta si aun así fuera muy largo.
+    const LIMITE = 42000;
+
+    function esc(t) {
+
+        return String(t)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
 
     // Se envía el inventario completo; los productos con stock bajo
     // o agotados van primero.
@@ -3644,36 +3654,47 @@ function construirTablaHtmlReporte() {
 
     if (items.length === 0) {
 
-        return (
-            "<p style=\"font-family:sans-serif;font-size:14px;\">" +
-            "No hay productos para mostrar por el momento." +
-            "</p>"
-        );
+        return "<p>No hay productos para mostrar por el momento.</p>";
     }
+
+    const cabecera =
+        "<table border=\"1\" cellpadding=\"5\" cellspacing=\"0\" " +
+        "style=\"border-collapse:collapse;font-family:sans-serif;font-size:13px;\">" +
+        "<tr><th align=\"left\">Producto</th>" +
+        "<th align=\"left\">Cantidad</th>" +
+        "<th align=\"left\">Costo</th></tr>";
 
     let filasHtml = "";
 
-    items.forEach(function(item) {
+    let incluidos = 0;
 
-        filasHtml +=
-            "<tr>" +
-            "<td style=\"" + estilo + "\">" + item.producto + "</td>" +
-            "<td style=\"" + estilo + "\">" + item.cantidad + "</td>" +
-            "<td style=\"" + estilo + "\">$" +
-                Number(item.costo || 0).toLocaleString("es-CL") + "</td>" +
-            "</tr>";
-    });
+    for (let i = 0; i < items.length; i++) {
 
-    return (
-        "<table style=\"border-collapse:collapse;font-family:sans-serif;font-size:13px;\">" +
-        "<thead><tr>" +
-        "<th style=\"" + estilo + "text-align:left;\">Producto</th>" +
-        "<th style=\"" + estilo + "text-align:left;\">Cantidad</th>" +
-        "<th style=\"" + estilo + "text-align:left;\">Costo</th>" +
-        "</tr></thead>" +
-        "<tbody>" + filasHtml + "</tbody>" +
-        "</table>"
-    );
+        const item = items[i];
+
+        const fila =
+            "<tr><td>" + esc(item.producto) + "</td><td>" +
+            esc(item.cantidad) + "</td><td>$" +
+            Number(item.costo || 0).toLocaleString("es-CL") +
+            "</td></tr>";
+
+        if (cabecera.length + filasHtml.length + fila.length > LIMITE) break;
+
+        filasHtml += fila;
+
+        incluidos++;
+    }
+
+    let nota = "";
+
+    if (incluidos < items.length) {
+
+        nota =
+            "<p>... y " + (items.length - incluidos) +
+            " productos más (ver el inventario completo en el panel).</p>";
+    }
+
+    return cabecera + filasHtml + "</table>" + nota;
 }
 
 
