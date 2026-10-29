@@ -1,9 +1,80 @@
 const SUPABASE_URL = "https://vuwqqcfptvlgikjczpqx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_7BqYGds7iv0CJtMXn5Zqxg_NmuAz2bh";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
+// Tablas que se guardan por separado para cada bar (columna "bar")
+const TABLAS_POR_BAR = [
+    "productos",
+    "categorias",
+    "ochenta_y_seis",
+    "ciento_uno",
+    "entradas",
+    "facturas",
+    "recetas"
+];
+
+// Envuelve el cliente: toda lectura/edición/borrado de esas tablas se limita
+// al bar actual, y todo lo que se inserta queda marcado con ese bar.
+function crearClientePorBar(cliente) {
+
+    function conBar(datos) {
+
+        const bar = barActual();
+
+        if (Array.isArray(datos)) {
+
+            return datos.map(function(d) {
+
+                return Object.assign({ bar: bar }, d);
+            });
+        }
+
+        return Object.assign({ bar: bar }, datos);
+    }
+
+    return new Proxy(cliente, {
+
+        get(destino, prop) {
+
+            if (prop === "from") {
+
+                return function(tabla) {
+
+                    const q = destino.from(tabla);
+
+                    if (TABLAS_POR_BAR.indexOf(tabla) === -1) return q;
+
+                    return {
+                        select: function(...a) {
+                            return q.select(...a).eq("bar", barActual());
+                        },
+                        insert: function(datos, ...r) {
+                            return q.insert(conBar(datos), ...r);
+                        },
+                        upsert: function(datos, ...r) {
+                            return q.upsert(conBar(datos), ...r);
+                        },
+                        update: function(...a) {
+                            return q.update(...a).eq("bar", barActual());
+                        },
+                        delete: function(...a) {
+                            return q.delete(...a).eq("bar", barActual());
+                        }
+                    };
+                };
+            }
+
+            const v = destino[prop];
+
+            return typeof v === "function" ? v.bind(destino) : v;
+        }
+    });
+}
+
+const supabaseClient = crearClientePorBar(
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    )
 );
 
 
@@ -3929,39 +4000,269 @@ if (form86) {
     setInterval(cargar86, 30000);
 }
 
-// Botón flotante: abre y minimiza la pizarra
-// (app.js carga antes que el botón en dashboard.html, por eso se espera al DOM)
-document.addEventListener("DOMContentLoaded", function() {
-    const p86Boton = document.getElementById("p86-boton");
-    const p86Panel = document.getElementById("p86-panel");
-    const p86Minimizar = document.getElementById("p86-minimizar");
+// ========================================
+// 101 (LO QUE HAY EN EXCESO Y HAY QUE VENDER MÁS)
+// ========================================
 
-    function alternarPizarra86(abrir) {
-        if (!p86Panel || !p86Boton) return;
-        p86Panel.hidden = !abrir;
-        p86Boton.classList.toggle("abierto", abrir);
-        p86Boton.setAttribute("aria-expanded", abrir ? "true" : "false");
-        if (abrir) {
-            cargar86();
-            if (input86) input86.focus();
+const form101 =
+    document.getElementById("form-101");
+
+const input101 =
+    document.getElementById("input-101");
+
+const lista101 =
+    document.getElementById("lista-101");
+
+const mensaje101 =
+    document.getElementById("mensaje-101");
+
+const badge101 =
+    document.getElementById("badge-101");
+
+
+function actualizarBadge101(cantidad) {
+
+    if (!badge101) return;
+
+    badge101.textContent = cantidad;
+
+    badge101.classList.toggle(
+        "hidden",
+        cantidad === 0
+    );
+}
+
+
+async function cargar101() {
+
+    if (!lista101) return;
+
+    const { data, error } =
+        await supabaseClient
+            .from("ciento_uno")
+            .select("id, nombre, created_at")
+            .order("created_at", { ascending: false });
+
+
+    if (error) {
+
+        console.error(
+            "Error cargando 101:",
+            error
+        );
+
+        if (mensaje101) {
+
+            mensaje101.textContent =
+                "No se pudo cargar la pizarra 101. " +
+                "¿Está creada la tabla ciento_uno en Supabase?";
         }
+
+        return;
     }
 
-    if (p86Boton && p86Panel) {
-        p86Boton.addEventListener("click", function() {
-            alternarPizarra86(p86Panel.hidden);
+
+    if (mensaje101) mensaje101.textContent = "";
+
+    lista101.innerHTML = "";
+
+    actualizarBadge101(data.length);
+
+
+    if (data.length === 0) {
+
+        const vacio = document.createElement("p");
+
+        vacio.className = "pizarra-vacio";
+
+        vacio.textContent =
+            "No hay nada en 101 por ahora.";
+
+        lista101.appendChild(vacio);
+
+        return;
+    }
+
+
+    data.forEach(function(item) {
+
+        const tarjeta = document.createElement("div");
+
+        tarjeta.className = "pizarra-item";
+
+        const texto = document.createElement("div");
+
+        const nombre = document.createElement("span");
+
+        nombre.className = "pizarra-item-nombre";
+
+        nombre.textContent = item.nombre;
+
+        const hora = document.createElement("span");
+
+        hora.className = "pizarra-item-hora";
+
+        hora.textContent =
+            new Date(item.created_at).toLocaleString(
+                "es-CL",
+                {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+
+        texto.appendChild(nombre);
+        texto.appendChild(hora);
+
+        const borrar = document.createElement("button");
+
+        borrar.type = "button";
+
+        borrar.className = "pizarra-borrar";
+
+        borrar.setAttribute("aria-label", "Borrar");
+
+        borrar.innerHTML = "&times;";
+
+        borrar.addEventListener("click", function() {
+
+            borrar101(item.id);
         });
-        if (p86Minimizar) {
-            p86Minimizar.addEventListener("click", function() {
-                alternarPizarra86(false);
+
+        tarjeta.appendChild(texto);
+        tarjeta.appendChild(borrar);
+
+        lista101.appendChild(tarjeta);
+    });
+}
+
+
+async function borrar101(id) {
+
+    const { error } =
+        await supabaseClient
+            .from("ciento_uno")
+            .delete()
+            .eq("id", id);
+
+
+    if (error) {
+
+        console.error(
+            "Error borrando 101:",
+            error
+        );
+
+        alert("No se pudo borrar el 101.");
+
+        return;
+    }
+
+
+    await cargar101();
+}
+
+
+if (form101) {
+
+    form101.addEventListener(
+        "submit",
+        async function(e) {
+
+            e.preventDefault();
+
+            const nombre = input101.value.trim();
+
+            if (!nombre) return;
+
+
+            const { error } =
+                await supabaseClient
+                    .from("ciento_uno")
+                    .insert({ nombre: nombre });
+
+
+            if (error) {
+
+                console.error(
+                    "Error agregando 101:",
+                    error
+                );
+
+                mensaje101.textContent =
+                    "No se pudo agregar el 101.";
+
+                return;
+            }
+
+
+            input101.value = "";
+
+            input101.focus();
+
+            await cargar101();
+        }
+    );
+
+
+    // Contador del botón al abrir el dashboard,
+    // y refresco cada 30 s para que el número esté al día
+    cargar101();
+    setInterval(cargar101, 30000);
+}
+
+
+// Botones flotantes: abren y minimizan las pizarras 86 y 101
+// (app.js carga antes que los botones en dashboard.html, por eso se espera al DOM)
+document.addEventListener("DOMContentLoaded", function() {
+
+    const pizarras = [
+        { id: "p86", cargar: cargar86, input: input86 },
+        { id: "p101", cargar: cargar101, input: input101 }
+    ];
+
+    function cerrarTodas() {
+        pizarras.forEach(function(p) {
+            const panel = document.getElementById(p.id + "-panel");
+            const boton = document.getElementById(p.id + "-boton");
+            if (!panel || !boton) return;
+            panel.hidden = true;
+            boton.classList.remove("abierto");
+            boton.setAttribute("aria-expanded", "false");
+        });
+    }
+
+    pizarras.forEach(function(p) {
+        const boton = document.getElementById(p.id + "-boton");
+        const panel = document.getElementById(p.id + "-panel");
+        const minimizar = document.getElementById(p.id + "-minimizar");
+        if (!boton || !panel) return;
+
+        function alternar(abrir) {
+            cerrarTodas();
+            if (!abrir) return;
+            panel.hidden = false;
+            boton.classList.add("abierto");
+            boton.setAttribute("aria-expanded", "true");
+            p.cargar();
+            if (p.input) p.input.focus();
+        }
+
+        boton.addEventListener("click", function() {
+            alternar(panel.hidden);
+        });
+        if (minimizar) {
+            minimizar.addEventListener("click", function() {
+                alternar(false);
             });
         }
-        document.addEventListener("keydown", function(e) {
-            if (e.key === "Escape" && !p86Panel.hidden) {
-                alternarPizarra86(false);
-            }
-        });
-    }
+    });
+
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") cerrarTodas();
+    });
 });
 
 // ========================================

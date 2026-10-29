@@ -745,7 +745,89 @@ const RECETARIO = [
  }
 ];
 
-const RECETARIO_TOTAL_PAGINAS = 51;
+const RECETARIO_ESTATICO = RECETARIO;
+
+let RECETAS = [];
+
+let RECETARIO_TOTAL_PAGINAS = 2;
+
+function puedeEditarCarta() {
+
+    return rolUsuario === "master" || rolUsuario === "admin";
+}
+
+function marcaCarta() {
+
+    if (barActual() === "babilonia") {
+
+        return {
+            logo: "imagen/LogoBabilonia.png",
+            alt: "Babilonia",
+            nombre: "BABILONIA",
+            cabecera: "RECETARIO BABILONIA",
+            sub: "Coctelería Babilonia",
+            filtro: "brightness(2.4) saturate(1.15)"
+        };
+    }
+
+    return {
+        logo: "imagen/BaristaLogo.png",
+        alt: "El Barista Caffè",
+        nombre: "EL BARISTA CAFFÈ",
+        cabecera: "RECETARIO BARISTA",
+        sub: "Coctelería Barista",
+        filtro: ""
+    };
+}
+
+// Carga las recetas del bar actual desde la base de datos.
+// Si la tabla aún no existe, Barista usa las recetas que vienen en el archivo.
+async function cargarRecetas() {
+
+    let lista = [];
+
+    try {
+
+        const { data, error } = await supabaseClient
+            .from("recetas")
+            .select("*")
+            .order("orden", { ascending: true })
+            .order("id", { ascending: true });
+
+        if (error) throw error;
+
+        lista = data || [];
+
+    } catch (err) {
+
+        console.error("Error cargando recetas:", err);
+
+        lista = barActual() === "barista"
+            ? RECETARIO_ESTATICO.map(function(r, i) {
+                return Object.assign({ id: null, orden: i + 1 }, r);
+            })
+            : [];
+    }
+
+    RECETAS = lista.map(function(r, i) {
+
+        return {
+            id: r.id,
+            orden: r.orden,
+            pagina: i + 3,
+            nombre: r.nombre || "",
+            indice: r.indice || r.nombre || "",
+            descripcion: r.descripcion || "",
+            ingredientes: Array.isArray(r.ingredientes) ? r.ingredientes : [],
+            elaboracion: r.elaboracion || "",
+            cristaleria: r.cristaleria || "",
+            preparacion: r.preparacion || "",
+            foto: r.foto || ""
+        };
+    });
+
+    RECETARIO_TOTAL_PAGINAS = 2 + RECETAS.length;
+}
 
 let recetarioListo = false;
 
@@ -780,9 +862,13 @@ function crearCabeceraLibro(subtitulo) {
 
     const logo = document.createElement("img");
 
-    logo.src = "imagen/BaristaLogo.png";
+    const marca = marcaCarta();
 
-    logo.alt = "El Barista Caffè";
+    logo.src = marca.logo;
+
+    logo.alt = marca.alt;
+
+    if (marca.filtro) logo.style.filter = marca.filtro;
 
     logo.className = "libro-logo";
 
@@ -802,19 +888,23 @@ function crearPortada() {
 
     const logo = document.createElement("img");
 
-    logo.src = "imagen/BaristaLogo.png";
+    const marca = marcaCarta();
 
-    logo.alt = "El Barista Caffè";
+    logo.src = marca.logo;
+
+    logo.alt = marca.alt;
+
+    if (marca.filtro) logo.style.filter = marca.filtro;
 
     logo.className = "libro-portada-logo";
 
     pag.appendChild(logo);
 
-    pag.appendChild(crearEl("p", "libro-sobretitulo", "EL BARISTA CAFFÈ"));
+    pag.appendChild(crearEl("p", "libro-sobretitulo", marca.nombre));
 
     pag.appendChild(crearEl("h3", "libro-portada-titulo", "RECETARIO"));
 
-    pag.appendChild(crearEl("p", "libro-portada-sub", "Coctelería Barista"));
+    pag.appendChild(crearEl("p", "libro-portada-sub", marca.sub));
 
     pag.appendChild(crearEl("div", "libro-linea"));
 
@@ -847,13 +937,26 @@ function crearIndice() {
 
     pag.dataset.pagina = "2";
 
-    pag.appendChild(crearCabeceraLibro("EL BARISTA CAFFÈ"));
+    pag.appendChild(crearCabeceraLibro(marcaCarta().nombre));
 
     pag.appendChild(crearEl("h3", "libro-titulo", "Índice"));
 
     const lista = crearEl("div", "libro-indice-lista");
 
-    RECETARIO.forEach(function(r) {
+    if (RECETAS.length === 0) {
+
+        lista.appendChild(
+            crearEl(
+                "p",
+                "libro-vacio",
+                puedeEditarCarta()
+                    ? "Aún no hay productos en la carta. Usa «Editar carta» para agregar el primero."
+                    : "Aún no hay productos en la carta."
+            )
+        );
+    }
+
+    RECETAS.forEach(function(r) {
 
         const item = crearEl("button", "libro-indice-item");
 
@@ -887,9 +990,14 @@ function crearPaginaReceta(r) {
 
     pag.dataset.pagina = String(r.pagina);
 
-    pag.appendChild(crearCabeceraLibro("RECETARIO BARISTA"));
+    pag.appendChild(crearCabeceraLibro(marcaCarta().cabecera));
 
     pag.appendChild(crearEl("h3", "libro-titulo", r.nombre));
+
+    if (r.descripcion) {
+
+        pag.appendChild(crearEl("p", "libro-descripcion", r.descripcion));
+    }
 
     const cuerpo = crearEl("div", "libro-cuerpo" + (r.foto ? "" : " sin-foto"));
 
@@ -937,6 +1045,8 @@ function crearPaginaReceta(r) {
         ["Cristalería", r.cristaleria],
         ["Preparación Barista", r.preparacion]
     ].forEach(function(par) {
+
+        if (!par[1]) return;
 
         const bloque = crearEl("div", "libro-detalle");
 
@@ -1079,9 +1189,7 @@ function ajustarEscalaRecetario() {
 let ultimaPaginaRecetario = 1;
 
 
-function construirRecetario() {
-
-    if (recetarioListo) return;
+function renderLibro() {
 
     const libro = document.getElementById("libro");
 
@@ -1093,10 +1201,24 @@ function construirRecetario() {
 
     libro.appendChild(crearIndice());
 
-    RECETARIO.forEach(function(r) {
+    RECETAS.forEach(function(r) {
 
         libro.appendChild(crearPaginaReceta(r));
     });
+
+    const btnEditar = document.getElementById("libro-editar");
+
+    if (btnEditar) btnEditar.hidden = !puedeEditarCarta();
+}
+
+
+function construirRecetario() {
+
+    if (recetarioListo) return;
+
+    const libro = document.getElementById("libro");
+
+    if (!libro) return;
 
     libro.addEventListener("scroll", function() {
 
@@ -1208,7 +1330,7 @@ function recetarioAbierto() {
 }
 
 
-function abrirRecetario() {
+async function abrirRecetario() {
 
     const overlay = document.getElementById("recetario-overlay");
 
@@ -1220,12 +1342,19 @@ function abrirRecetario() {
 
     document.body.classList.add("libro-abierto");
 
+    await cargarRecetas();
+
+    renderLibro();
+
     // Primero se muestra la ventana; luego se mide y se ajusta el tamaño
     window.requestAnimationFrame(function() {
 
         ajustarEscalaRecetario();
 
-        irAPaginaRecetario(ultimaPaginaRecetario, true);
+        irAPaginaRecetario(
+            Math.min(ultimaPaginaRecetario, RECETARIO_TOTAL_PAGINAS),
+            true
+        );
 
         actualizarIndicadorRecetario();
     });
@@ -1244,3 +1373,458 @@ function cerrarRecetario() {
 
     document.body.classList.remove("libro-abierto");
 }
+
+
+
+// ========================================
+// EDITOR DE LA CARTA (solo master y admin)
+// ========================================
+
+let recetaEditando = null;
+
+let fotoNuevaArchivo = null;
+
+let fotoQuitada = false;
+
+
+function elEd(id) {
+
+    return document.getElementById(id);
+}
+
+
+function mostrarListaEditor() {
+
+    elEd("carta-form").hidden = true;
+
+    elEd("carta-lista-wrap").hidden = false;
+
+    elEd("carta-nuevo").hidden = false;
+
+    const cont = elEd("carta-lista");
+
+    cont.innerHTML = "";
+
+    if (RECETAS.length === 0) {
+
+        cont.appendChild(
+            crearEl("p", "libro-vacio", "La carta está vacía. Agrega el primer producto.")
+        );
+    }
+
+    RECETAS.forEach(function(r, i) {
+
+        const fila = crearEl("div", "carta-fila");
+
+        if (r.foto) {
+
+            const mini = document.createElement("img");
+
+            mini.src = r.foto;
+
+            mini.alt = "";
+
+            mini.className = "carta-mini";
+
+            fila.appendChild(mini);
+
+        } else {
+
+            fila.appendChild(crearEl("span", "carta-mini carta-mini-vacia", "Sin foto"));
+        }
+
+        fila.appendChild(crearEl("span", "carta-fila-nombre", r.nombre));
+
+        const acciones = crearEl("div", "carta-fila-acciones");
+
+        const subir = crearEl("button", "btn-secondary", "▲");
+
+        subir.type = "button";
+
+        subir.setAttribute("aria-label", "Subir");
+
+        subir.disabled = i === 0;
+
+        subir.addEventListener("click", function() { moverReceta(i, -1); });
+
+        const bajar = crearEl("button", "btn-secondary", "▼");
+
+        bajar.type = "button";
+
+        bajar.setAttribute("aria-label", "Bajar");
+
+        bajar.disabled = i === RECETAS.length - 1;
+
+        bajar.addEventListener("click", function() { moverReceta(i, 1); });
+
+        const editar = crearEl("button", "btn-secondary", "Editar");
+
+        editar.type = "button";
+
+        editar.addEventListener("click", function() { abrirFormularioReceta(r); });
+
+        acciones.appendChild(subir);
+
+        acciones.appendChild(bajar);
+
+        acciones.appendChild(editar);
+
+        fila.appendChild(acciones);
+
+        cont.appendChild(fila);
+    });
+}
+
+
+async function moverReceta(i, delta) {
+
+    const a = RECETAS[i];
+
+    const b = RECETAS[i + delta];
+
+    if (!a || !b || a.id == null || b.id == null) return;
+
+    // Se reasignan todas las posiciones para que nunca queden repetidas
+    const nuevo = RECETAS.slice();
+
+    nuevo[i] = b;
+
+    nuevo[i + delta] = a;
+
+    const cambios = [];
+
+    nuevo.forEach(function(r, k) {
+
+        if (r.orden !== k + 1) cambios.push({ id: r.id, orden: k + 1 });
+    });
+
+    for (const c of cambios) {
+
+        const { error } = await supabaseClient
+            .from("recetas")
+            .update({ orden: c.orden })
+            .eq("id", c.id);
+
+        if (error) {
+
+            alert("No se pudo cambiar el orden.");
+
+            console.error(error);
+
+            break;
+        }
+    }
+
+    await refrescarCarta();
+}
+
+
+async function refrescarCarta() {
+
+    await cargarRecetas();
+
+    renderLibro();
+
+    ajustarEscalaRecetario();
+
+    mostrarListaEditor();
+}
+
+
+function abrirFormularioReceta(r) {
+
+    recetaEditando = r || null;
+
+    fotoNuevaArchivo = null;
+
+    fotoQuitada = false;
+
+    elEd("carta-lista-wrap").hidden = true;
+
+    elEd("carta-nuevo").hidden = true;
+
+    elEd("carta-form").hidden = false;
+
+    elEd("carta-form-titulo").textContent = r ? "Editar producto" : "Nuevo producto";
+
+    elEd("carta-nombre").value = r ? r.nombre : "";
+
+    elEd("carta-indice").value = r && r.indice !== r.nombre ? r.indice : "";
+
+    elEd("carta-descripcion").value = r ? r.descripcion : "";
+
+    elEd("carta-ingredientes").value = r ? r.ingredientes.join("\n") : "";
+
+    elEd("carta-elaboracion").value = r ? r.elaboracion : "";
+
+    elEd("carta-cristaleria").value = r ? r.cristaleria : "";
+
+    elEd("carta-preparacion").value = r ? r.preparacion : "";
+
+    elEd("carta-foto").value = "";
+
+    elEd("carta-mensaje").textContent = "";
+
+    elEd("carta-eliminar").hidden = !r || r.id == null;
+
+    pintarVistaFoto(r ? r.foto : "");
+}
+
+
+function pintarVistaFoto(url) {
+
+    const vista = elEd("carta-foto-vista");
+
+    vista.innerHTML = "";
+
+    if (!url) {
+
+        vista.appendChild(crearEl("span", "carta-mini carta-mini-vacia", "Sin foto"));
+
+        elEd("carta-foto-quitar").hidden = true;
+
+        return;
+    }
+
+    const img = document.createElement("img");
+
+    img.src = url;
+
+    img.alt = "Foto del producto";
+
+    img.className = "carta-foto-grande";
+
+    vista.appendChild(img);
+
+    elEd("carta-foto-quitar").hidden = false;
+}
+
+
+// Reduce la foto (máx. 1100 px) para que suba rápido, incluso desde el teléfono
+function reducirFoto(archivo) {
+
+    return new Promise(function(resolver) {
+
+        const lector = new FileReader();
+
+        lector.onerror = function() { resolver(archivo); };
+
+        lector.onload = function() {
+
+            const img = new Image();
+
+            img.onerror = function() { resolver(archivo); };
+
+            img.onload = function() {
+
+                const max = 1100;
+
+                const k = Math.min(1, max / Math.max(img.width, img.height));
+
+                const lienzo = document.createElement("canvas");
+
+                lienzo.width = Math.round(img.width * k);
+
+                lienzo.height = Math.round(img.height * k);
+
+                lienzo.getContext("2d").drawImage(img, 0, 0, lienzo.width, lienzo.height);
+
+                lienzo.toBlob(function(blob) {
+
+                    resolver(blob || archivo);
+
+                }, "image/jpeg", 0.85);
+            };
+
+            img.src = lector.result;
+        };
+
+        lector.readAsDataURL(archivo);
+    });
+}
+
+
+async function guardarReceta(e) {
+
+    e.preventDefault();
+
+    const msg = elEd("carta-mensaje");
+
+    const nombre = elEd("carta-nombre").value.trim();
+
+    if (!nombre) {
+
+        msg.textContent = "Escribe el nombre del producto.";
+
+        return;
+    }
+
+    const boton = elEd("carta-guardar");
+
+    boton.disabled = true;
+
+    msg.textContent = "Guardando...";
+
+    try {
+
+        let foto = recetaEditando ? recetaEditando.foto : "";
+
+        if (fotoQuitada) foto = "";
+
+        if (fotoNuevaArchivo) {
+
+            const blob = await reducirFoto(fotoNuevaArchivo);
+
+            const ruta = barActual() + "/" + Date.now() + ".jpg";
+
+            const { error: errSubida } = await supabaseClient
+                .storage
+                .from("recetas")
+                .upload(ruta, blob, { contentType: "image/jpeg", upsert: true });
+
+            if (errSubida) throw errSubida;
+
+            foto = supabaseClient
+                .storage
+                .from("recetas")
+                .getPublicUrl(ruta).data.publicUrl;
+        }
+
+        const datos = {
+            nombre: nombre,
+            indice: elEd("carta-indice").value.trim() || nombre,
+            descripcion: elEd("carta-descripcion").value.trim(),
+            ingredientes: elEd("carta-ingredientes").value
+                .split("\n")
+                .map(function(t) { return t.trim(); })
+                .filter(Boolean),
+            elaboracion: elEd("carta-elaboracion").value.trim(),
+            cristaleria: elEd("carta-cristaleria").value.trim(),
+            preparacion: elEd("carta-preparacion").value.trim(),
+            foto: foto || null
+        };
+
+        let error;
+
+        if (recetaEditando && recetaEditando.id != null) {
+
+            ({ error } = await supabaseClient
+                .from("recetas")
+                .update(datos)
+                .eq("id", recetaEditando.id));
+
+        } else {
+
+            datos.orden = RECETAS.reduce(function(m, r) {
+                return Math.max(m, Number(r.orden) || 0);
+            }, 0) + 1;
+
+            ({ error } = await supabaseClient
+                .from("recetas")
+                .insert(datos));
+        }
+
+        if (error) throw error;
+
+        await refrescarCarta();
+
+    } catch (err) {
+
+        console.error("Error guardando receta:", err);
+
+        msg.textContent =
+            "No se pudo guardar. ¿Ejecutaste el SQL nuevo en Supabase? (" +
+            (err && err.message ? err.message : "error") + ")";
+
+    } finally {
+
+        boton.disabled = false;
+    }
+}
+
+
+async function eliminarReceta() {
+
+    if (!recetaEditando || recetaEditando.id == null) return;
+
+    if (!confirm("¿Eliminar «" + recetaEditando.nombre + "» de la carta?")) return;
+
+    const { error } = await supabaseClient
+        .from("recetas")
+        .delete()
+        .eq("id", recetaEditando.id);
+
+    if (error) {
+
+        console.error(error);
+
+        alert("No se pudo eliminar.");
+
+        return;
+    }
+
+    await refrescarCarta();
+}
+
+
+function abrirEditorCarta() {
+
+    elEd("carta-editor").hidden = false;
+
+    mostrarListaEditor();
+}
+
+
+function cerrarEditorCarta() {
+
+    elEd("carta-editor").hidden = true;
+
+    // Vuelve al índice para ver los cambios
+    irAPaginaRecetario(2, true);
+}
+
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    const editar = elEd("libro-editar");
+
+    if (!editar) return;
+
+    editar.addEventListener("click", abrirEditorCarta);
+
+    elEd("carta-cerrar").addEventListener("click", cerrarEditorCarta);
+
+    elEd("carta-nuevo").addEventListener("click", function() {
+        abrirFormularioReceta(null);
+    });
+
+    elEd("carta-cancelar").addEventListener("click", mostrarListaEditor);
+
+    elEd("carta-form").addEventListener("submit", guardarReceta);
+
+    elEd("carta-eliminar").addEventListener("click", eliminarReceta);
+
+    elEd("carta-foto").addEventListener("change", function(e) {
+
+        const f = e.target.files && e.target.files[0];
+
+        if (!f) return;
+
+        fotoNuevaArchivo = f;
+
+        fotoQuitada = false;
+
+        pintarVistaFoto(URL.createObjectURL(f));
+    });
+
+    elEd("carta-foto-quitar").addEventListener("click", function() {
+
+        fotoNuevaArchivo = null;
+
+        fotoQuitada = true;
+
+        elEd("carta-foto").value = "";
+
+        pintarVistaFoto("");
+    });
+});

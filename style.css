@@ -3413,6 +3413,190 @@ body.libro-abierto {
     }
 }
 
+/* ---- Editor de la carta ---- */
+
+.libro-panel {
+    position: relative;
+}
+
+.libro-descripcion {
+    margin: 4px 0 10px;
+    color: var(--texto-secundario);
+    font-size: 0.95em;
+    text-align: center;
+    font-style: italic;
+}
+
+.libro-vacio {
+    margin: 20px 0;
+    color: var(--texto-secundario);
+    text-align: center;
+}
+
+.carta-editor {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    background: #0e0e0f;
+}
+
+.carta-editor[hidden],
+.carta-form[hidden],
+#carta-lista-wrap[hidden] {
+    display: none;
+}
+
+.carta-editor-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--borde);
+}
+
+.carta-editor-barra h3 {
+    margin: 0;
+    color: var(--blanco);
+    font-size: 20px;
+}
+
+.carta-editor-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.carta-editor-cuerpo {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.carta-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.carta-fila {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.carta-mini {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.carta-mini-vacia {
+    display: grid;
+    place-items: center;
+    border: 1px dashed var(--borde);
+    font-size: 10px;
+    color: var(--texto-secundario);
+}
+
+.carta-fila-nombre {
+    flex: 1;
+    min-width: 0;
+    color: var(--blanco);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.carta-fila-acciones {
+    display: flex;
+    gap: 6px;
+}
+
+.carta-fila-acciones button {
+    padding: 6px 10px;
+}
+
+.carta-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.carta-form h4 {
+    margin: 0;
+    color: var(--blanco);
+    font-size: 18px;
+}
+
+.carta-form .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    color: var(--texto-secundario);
+    font-size: 13px;
+}
+
+.carta-form input[type="text"],
+.carta-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 15px;
+}
+
+.carta-etiqueta {
+    color: var(--texto-secundario);
+    font-size: 13px;
+}
+
+.carta-foto-vista {
+    display: flex;
+}
+
+.carta-foto-grande {
+    max-width: 220px;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.carta-foto-botones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.carta-mensaje {
+    min-height: 18px;
+    margin: 0;
+    color: var(--texto-secundario);
+    font-size: 13px;
+}
+
+.carta-form-botones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.carta-eliminar {
+    margin-left: auto;
+    color: #ef6b63;
+    border-color: #ef6b63;
+}
+
 /* ========================================
    FORMULARIOS EN REJILLA (FACTURAS / ENTRADAS)
 ======================================== */
@@ -3771,6 +3955,40 @@ body.libro-abierto {
     }
     .p86-boton {
         transition: none;
+    }
+}
+
+/* ---- Botones 86 y 101 en fila; el 101 va en tono dorado ---- */
+
+.p86-botones {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.p101-boton {
+    background: linear-gradient(145deg, #3a3322, #241f14);
+    border-color: #8a6a2e;
+}
+
+.p101-boton.abierto {
+    background: linear-gradient(145deg, #4a4029, #2e2718);
+}
+
+.p101-panel {
+    background: radial-gradient(circle at 30% 0%, #3a3322 0%, #241f14 60%);
+    border-color: #6b5226;
+}
+
+body.bar-babilonia #badge-101 {
+    background: #8a6a2e;
+}
+
+@media (max-width: 700px) {
+
+    .p86-botones {
+        gap: 8px;
     }
 }
 

@@ -1764,6 +1764,61 @@
 
         </div>
 
+
+        <div
+            id="p101-panel"
+            class="p86-panel p101-panel"
+            role="dialog"
+            aria-label="Pizarra 101"
+            hidden
+        >
+
+            <div class="p86-cabecera">
+                <span class="p86-titulo">Lo que hay de más · a vender</span>
+                <button
+                    type="button"
+                    id="p101-minimizar"
+                    class="p86-minimizar"
+                    aria-label="Minimizar pizarra 101"
+                >
+                    &minus;
+                </button>
+            </div>
+
+            <form
+                id="form-101"
+                class="pizarra-form"
+                autocomplete="off"
+            >
+                <input
+                    type="text"
+                    id="input-101"
+                    placeholder="Ej: Jarabe de vainilla"
+                    maxlength="80"
+                    required
+                >
+                <button
+                    type="submit"
+                    class="btn-primary"
+                >
+                    Agregar
+                </button>
+            </form>
+
+            <p
+                id="mensaje-101"
+                class="pizarra-mensaje"
+            ></p>
+
+            <div
+                id="lista-101"
+                class="pizarra-lista"
+            ></div>
+
+        </div>
+
+        <div class="p86-botones">
+
         <button
             type="button"
             id="p86-boton"
@@ -1778,6 +1833,24 @@
                 id="badge-86"
             >0</span>
         </button>
+
+
+        <button
+            type="button"
+            id="p101-boton"
+            class="p86-boton p101-boton"
+            aria-expanded="false"
+            aria-controls="p101-panel"
+        >
+            <span class="p86-boton-num">101</span>
+            <span class="p86-boton-txt">A vender</span>
+            <span
+                class="menu-badge hidden"
+                id="badge-101"
+            >0</span>
+        </button>
+
+        </div>
 
     </div>
 
@@ -1812,6 +1885,15 @@
                         class="btn-secondary"
                     >
                         Índice
+                    </button>
+
+                    <button
+                        type="button"
+                        id="libro-editar"
+                        class="btn-primary"
+                        hidden
+                    >
+                        Editar carta
                     </button>
 
                     <button
@@ -1856,6 +1938,74 @@
                 id="libro"
                 class="libro"
             ></div>
+
+            <!-- Editor de la carta (solo master y admin) -->
+            <div id="carta-editor" class="carta-editor" hidden>
+
+                <div class="carta-editor-barra">
+                    <h3>Editar carta</h3>
+                    <div class="carta-editor-botones">
+                        <button type="button" id="carta-nuevo" class="btn-primary">+ Nuevo producto</button>
+                        <button type="button" id="carta-cerrar" class="btn-secondary">Volver al libro</button>
+                    </div>
+                </div>
+
+                <div id="carta-lista-wrap" class="carta-editor-cuerpo">
+                    <div id="carta-lista" class="carta-lista"></div>
+                </div>
+
+                <form id="carta-form" class="carta-editor-cuerpo carta-form" autocomplete="off" hidden>
+
+                    <h4 id="carta-form-titulo">Nuevo producto</h4>
+
+                    <label class="campo">Nombre
+                        <input type="text" id="carta-nombre" maxlength="80" required>
+                    </label>
+
+                    <label class="campo">Nombre en el índice (opcional)
+                        <input type="text" id="carta-indice" maxlength="80">
+                    </label>
+
+                    <div class="campo">
+                        <span class="carta-etiqueta">Foto</span>
+                        <div id="carta-foto-vista" class="carta-foto-vista"></div>
+                        <div class="carta-foto-botones">
+                            <input type="file" id="carta-foto" accept="image/*">
+                            <button type="button" id="carta-foto-quitar" class="btn-secondary" hidden>Quitar foto</button>
+                        </div>
+                    </div>
+
+                    <label class="campo">Descripción
+                        <textarea id="carta-descripcion" rows="2" placeholder="Una frase que describa el producto"></textarea>
+                    </label>
+
+                    <label class="campo">Ingredientes / receta (uno por línea)
+                        <textarea id="carta-ingredientes" rows="6" placeholder="2 OZ VODKA&#10;1 OZ JUGO DE LIMÓN"></textarea>
+                    </label>
+
+                    <label class="campo">Elaboración
+                        <textarea id="carta-elaboracion" rows="2"></textarea>
+                    </label>
+
+                    <label class="campo">Cristalería
+                        <input type="text" id="carta-cristaleria" maxlength="120">
+                    </label>
+
+                    <label class="campo">Preparación
+                        <textarea id="carta-preparacion" rows="3"></textarea>
+                    </label>
+
+                    <p id="carta-mensaje" class="carta-mensaje"></p>
+
+                    <div class="carta-form-botones">
+                        <button type="submit" id="carta-guardar" class="btn-primary">Guardar</button>
+                        <button type="button" id="carta-cancelar" class="btn-secondary">Cancelar</button>
+                        <button type="button" id="carta-eliminar" class="btn-secondary carta-eliminar" hidden>Eliminar</button>
+                    </div>
+
+                </form>
+
+            </div>
 
         </div>
 
