@@ -3657,7 +3657,8 @@ function construirTablaHtmlReporte() {
             "<tr>" +
             "<td style=\"" + estilo + "\">" + item.producto + "</td>" +
             "<td style=\"" + estilo + "\">" + item.cantidad + "</td>" +
-            "<td style=\"" + estilo + "\">" + item.estado + "</td>" +
+            "<td style=\"" + estilo + "\">$" +
+                Number(item.costo || 0).toLocaleString("es-CL") + "</td>" +
             "</tr>";
     });
 
@@ -3666,7 +3667,7 @@ function construirTablaHtmlReporte() {
         "<thead><tr>" +
         "<th style=\"" + estilo + "text-align:left;\">Producto</th>" +
         "<th style=\"" + estilo + "text-align:left;\">Cantidad</th>" +
-        "<th style=\"" + estilo + "text-align:left;\">Estado</th>" +
+        "<th style=\"" + estilo + "text-align:left;\">Costo</th>" +
         "</tr></thead>" +
         "<tbody>" + filasHtml + "</tbody>" +
         "</table>"
