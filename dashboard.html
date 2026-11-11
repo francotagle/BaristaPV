@@ -453,8 +453,18 @@
                     <input
                         type="text"
                         id="buscar-producto"
-                        placeholder="Buscar producto..."
+                        placeholder="Buscar producto o escanear código..."
                     >
+
+                    <button
+                        type="button"
+                        id="btn-escanear"
+                        class="btn-primary btn-escanear"
+                    >
+                        Escanear
+                    </button>
+
+                    <span id="escaneo-mensaje" class="escaneo-mensaje"></span>
 
                 </div>
 
@@ -505,6 +515,10 @@
 
                                     <th>
                                         Venta
+                                    </th>
+
+                                    <th>
+                                        Última modificación
                                     </th>
 
                                     <th>
@@ -1073,6 +1087,8 @@
                     required
                 >
 
+                <p id="producto-ultimo-cambio" class="ultimo-cambio-modal"></p>
+
 
 
                 <label for="producto-minimo">
@@ -1089,6 +1105,30 @@
                 >
 
 
+
+                <label for="producto-codigo">
+                    Código de barras (opcional)
+                </label>
+
+                <div class="codigo-fila">
+
+                    <input
+                        type="text"
+                        id="producto-codigo"
+                        inputmode="numeric"
+                        autocomplete="off"
+                        placeholder="Escanea o escribe el código"
+                    >
+
+                    <button
+                        type="button"
+                        id="btn-escanear-codigo"
+                        class="btn-secondary"
+                    >
+                        Escanear
+                    </button>
+
+                </div>
 
                 <div
                     id="campos-costos"
@@ -1634,6 +1674,11 @@
                 </div>
 
                 <div class="detalle-row">
+                    <span>Última modificación</span>
+                    <strong id="detalle-cambio"></strong>
+                </div>
+
+                <div class="detalle-row">
                     <span>Prioridad</span>
                     <strong id="detalle-prioridad"></strong>
                 </div>
@@ -1681,6 +1726,35 @@
 
         </div>
 
+
+    </div>
+
+
+
+    <!-- ESCÁNER DE CÓDIGO DE BARRAS (cámara) -->
+
+    <div id="modal-escaner" class="modal hidden">
+
+        <div class="modal-box escaner-box">
+
+            <div class="modal-header">
+
+                <div>
+                    <h2>Escanear código</h2>
+                    <p id="escaner-estado">Apunta la cámara al código de barras</p>
+                </div>
+
+                <button type="button" class="btn-close" id="escaner-cerrar">×</button>
+
+            </div>
+
+            <video id="escaner-video" class="escaner-video" playsinline muted></video>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" id="escaner-cancelar">Cancelar</button>
+            </div>
+
+        </div>
 
     </div>
 
@@ -2244,6 +2318,9 @@
 
                     document.getElementById('detalle-estado').textContent =
                         celdas[5].textContent.trim();
+
+                    document.getElementById('detalle-cambio').textContent =
+                        fila.dataset.cambio || '—';
 
                     var celdaAcciones = celdas[celdas.length - 1];
 

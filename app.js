@@ -864,6 +864,22 @@ const productoForm =
     document.getElementById("producto-form");
 
 
+function mensajeErrorProducto(error, porDefecto) {
+
+    if (error && error.code === "23505") {
+
+        return "Ese código de barras ya está asignado a otro producto.";
+    }
+
+    if (error && /codigo_barras|ultima_modificacion/.test(error.message || "")) {
+
+        return "Falta ejecutar el SQL nuevo en Supabase (código de barras).";
+    }
+
+    return porDefecto;
+}
+
+
 // ========================================
 // ABRIR MODAL NUEVO PRODUCTO
 // ========================================
@@ -875,6 +891,10 @@ if (btnNuevoProducto) {
         async function() {
 
             productoForm.reset();
+
+            document.getElementById(
+                "producto-ultimo-cambio"
+            ).textContent = "";
 
             document.getElementById(
                 "producto-id"
@@ -1030,6 +1050,11 @@ if (productoForm) {
                     ).value
                 ) || 0;
 
+            const codigo =
+                document.getElementById(
+                    "producto-codigo"
+                ).value.trim();
+
             if (esRestringido()) {
 
                 if (!id) {
@@ -1116,6 +1141,8 @@ if (productoForm) {
 
                 stock_minimo: minimo,
 
+                codigo_barras: codigo || null,
+
                 activo: true
             };
 
@@ -1145,7 +1172,10 @@ if (productoForm) {
                     );
 
                     mensaje.textContent =
-                        "Error al actualizar el producto.";
+                        mensajeErrorProducto(
+                            error,
+                            "Error al actualizar el producto."
+                        );
 
                     return;
                 }
@@ -1212,7 +1242,10 @@ if (productoForm) {
                 );
 
                 mensaje.textContent =
-                    "Error al guardar el producto.";
+                    mensajeErrorProducto(
+                        error,
+                        "Error al guardar el producto."
+                    );
 
                 return;
             }
@@ -1270,6 +1303,29 @@ if (productoForm) {
 let versionTablaProductos = 0;
 
 
+// "10/11 15:30 · Franco" (o "—" si nunca se ha modificado)
+function formatoUltimoCambio(fecha, correo) {
+
+    if (!fecha) return "—";
+
+    const d = new Date(fecha);
+
+    if (isNaN(d.getTime())) return "—";
+
+    const texto = d.toLocaleString("es-CL", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+    });
+
+    return correo
+        ? texto.replace(", ", " ") + " · " + nombreDesdeCorreo(correo)
+        : texto.replace(", ", " ");
+}
+
+
 async function cargarProductos() {
 
     const miVersion = ++versionTablaProductos;
@@ -1286,7 +1342,7 @@ async function cargarProductos() {
 
     tabla.innerHTML = `
         <tr>
-            <td colspan="9" class="empty">
+            <td colspan="10" class="empty">
                 Cargando productos...
             </td>
         </tr>
@@ -1305,6 +1361,9 @@ async function cargarProductos() {
                 prioridad,
                 activo,
                 categoria_id,
+                ultima_modificacion,
+                modificado_por,
+                codigo_barras,
                 categorias (
                     nombre
                 )
@@ -1323,7 +1382,7 @@ async function cargarProductos() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="9" class="empty">
+                <td colspan="10" class="empty">
                     Error al cargar productos.
                 </td>
             </tr>
@@ -1337,7 +1396,7 @@ async function cargarProductos() {
 
         tabla.innerHTML = `
             <tr>
-                <td colspan="9" class="empty">
+                <td colspan="10" class="empty">
                     No hay productos registrados.
                 </td>
             </tr>
@@ -1397,6 +1456,16 @@ async function cargarProductos() {
 
         fila.dataset.id = producto.id;
 
+        fila.dataset.codigo = producto.codigo_barras || "";
+
+        const cambioTexto =
+            formatoUltimoCambio(
+                producto.ultima_modificacion,
+                producto.modificado_por
+            );
+
+        fila.dataset.cambio = cambioTexto;
+
 
         const costoProducto = costos[producto.id];
 
@@ -1451,6 +1520,9 @@ async function cargarProductos() {
                 <strong>
                     ${producto.nombre}
                 </strong>
+                <span class="ultimo-cambio-movil">
+                    Últ. cambio: ${cambioTexto}
+                </span>
             </td>
 
             <td>
@@ -1479,6 +1551,10 @@ async function cargarProductos() {
 
             <td>
                 ${ventaTexto}
+            </td>
+
+            <td class="celda-ultimo-cambio">
+                ${cambioTexto}
             </td>
 
             <td>
@@ -1647,8 +1723,11 @@ if (buscador) {
             filas.forEach(function(fila) {
 
                 const contenido =
-                    fila.textContent
-                        .toLowerCase();
+                    (
+                        fila.textContent +
+                        " " +
+                        (fila.dataset.codigo || "")
+                    ).toLowerCase();
 
 
                 fila.style.display =
@@ -1661,6 +1740,284 @@ if (buscador) {
         }
     );
 }
+
+
+// Un lector de código de barras escribe el código y pulsa Enter:
+// si coincide con un producto, se abre directo para cambiar su stock.
+if (buscador) {
+
+    buscador.addEventListener(
+        "keydown",
+        function(e) {
+
+            if (e.key !== "Enter") return;
+
+            e.preventDefault();
+
+            const codigo = buscador.value.trim();
+
+            if (codigo) abrirProductoPorCodigo(codigo);
+        }
+    );
+}
+
+
+function mostrarMensajeEscaneo(texto, error) {
+
+    const el = document.getElementById("escaneo-mensaje");
+
+    if (!el) return;
+
+    el.textContent = texto;
+
+    el.classList.toggle("error", !!error);
+
+    clearTimeout(mostrarMensajeEscaneo.t);
+
+    if (texto) {
+
+        mostrarMensajeEscaneo.t = setTimeout(function() {
+
+            el.textContent = "";
+
+        }, 6000);
+    }
+}
+
+
+function abrirProductoPorCodigo(codigo) {
+
+    const fila =
+        Array.from(
+            document.querySelectorAll("#productos-tabla tr")
+        ).find(function(f) {
+
+            return f.dataset.codigo === codigo;
+        });
+
+    if (!fila) {
+
+        mostrarMensajeEscaneo(
+            "El código " + codigo + " no está registrado en ningún producto.",
+            true
+        );
+
+        return false;
+    }
+
+    if (buscador) {
+
+        buscador.value = "";
+
+        buscador.dispatchEvent(new Event("input"));
+    }
+
+    mostrarMensajeEscaneo("");
+
+    editarProducto(fila.dataset.id);
+
+    return true;
+}
+
+
+// ========================================
+// ESCÁNER CON CÁMARA
+// ========================================
+
+let escanerActivo = null;
+
+async function abrirEscaner(alLeer) {
+
+    const modal = document.getElementById("modal-escaner");
+
+    const video = document.getElementById("escaner-video");
+
+    const estado = document.getElementById("escaner-estado");
+
+    if (!modal || !video) return;
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+
+        alert("Este navegador no permite usar la cámara (se necesita https).");
+
+        return;
+    }
+
+    cerrarEscaner();
+
+    estado.textContent = "Iniciando cámara...";
+
+    modal.classList.remove("hidden");
+
+    const sesion = { activo: true, stream: null, control: null };
+
+    escanerActivo = sesion;
+
+    function leido(texto) {
+
+        if (!sesion.activo || !texto) return;
+
+        cerrarEscaner();
+
+        if (navigator.vibrate) navigator.vibrate(120);
+
+        alLeer(String(texto).trim());
+    }
+
+    try {
+
+        sesion.stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" } },
+            audio: false
+        });
+
+        if (!sesion.activo) {
+
+            sesion.stream.getTracks().forEach(function(t) { t.stop(); });
+
+            return;
+        }
+
+        video.srcObject = sesion.stream;
+
+        await video.play();
+
+        estado.textContent = "Apunta la cámara al código de barras";
+
+        if ("BarcodeDetector" in window) {
+
+            const detector = new BarcodeDetector({
+                formats: [
+                    "ean_13", "ean_8", "upc_a", "upc_e",
+                    "code_128", "code_39", "itf", "qr_code"
+                ]
+            });
+
+            const ciclo = async function() {
+
+                if (!sesion.activo) return;
+
+                try {
+
+                    const codigos = await detector.detect(video);
+
+                    if (codigos.length) {
+
+                        leido(codigos[0].rawValue);
+
+                        return;
+                    }
+
+                } catch (err) { /* se sigue intentando */ }
+
+                setTimeout(ciclo, 250);
+            };
+
+            ciclo();
+
+            return;
+        }
+
+        // Navegadores sin BarcodeDetector (por ejemplo iPhone): librería ZXing
+        const zxing = await import(
+            "https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/+esm"
+        );
+
+        const lector = new zxing.BrowserMultiFormatReader();
+
+        sesion.control = await lector.decodeFromVideoElement(
+            video,
+            function(resultado) {
+
+                if (resultado) leido(resultado.getText());
+            }
+        );
+
+    } catch (err) {
+
+        console.error("Error con la cámara:", err);
+
+        estado.textContent =
+            "No se pudo usar la cámara. Revisa el permiso del navegador.";
+    }
+}
+
+function cerrarEscaner() {
+
+    const modal = document.getElementById("modal-escaner");
+
+    const video = document.getElementById("escaner-video");
+
+    if (escanerActivo) {
+
+        escanerActivo.activo = false;
+
+        if (escanerActivo.control && escanerActivo.control.stop) {
+
+            try { escanerActivo.control.stop(); } catch (e) { /* nada */ }
+        }
+
+        if (escanerActivo.stream) {
+
+            escanerActivo.stream.getTracks().forEach(function(t) { t.stop(); });
+        }
+
+        escanerActivo = null;
+    }
+
+    if (video) video.srcObject = null;
+
+    if (modal) modal.classList.add("hidden");
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    const btn = document.getElementById("btn-escanear");
+
+    if (btn) {
+
+        btn.addEventListener("click", function() {
+
+            abrirEscaner(function(codigo) {
+
+                if (buscador) buscador.value = codigo;
+
+                abrirProductoPorCodigo(codigo);
+            });
+        });
+    }
+
+    const btnCodigo = document.getElementById("btn-escanear-codigo");
+
+    if (btnCodigo) {
+
+        btnCodigo.addEventListener("click", function() {
+
+            abrirEscaner(function(codigo) {
+
+                document.getElementById("producto-codigo").value = codigo;
+            });
+        });
+    }
+
+    const inputCodigo = document.getElementById("producto-codigo");
+
+    // El lector USB termina con Enter: que no envíe el formulario
+    if (inputCodigo) {
+
+        inputCodigo.addEventListener("keydown", function(e) {
+
+            if (e.key === "Enter") e.preventDefault();
+        });
+    }
+
+    ["escaner-cerrar", "escaner-cancelar"].forEach(function(id) {
+
+        const el = document.getElementById(id);
+
+        if (el) el.addEventListener("click", cerrarEscaner);
+    });
+});
 
 
 // ========================================
@@ -1803,6 +2160,21 @@ async function editarProducto(id) {
     document.getElementById(
         "producto-minimo"
     ).value = data.stock_minimo;
+
+
+    document.getElementById(
+        "producto-codigo"
+    ).value = data.codigo_barras || "";
+
+
+    document.getElementById(
+        "producto-ultimo-cambio"
+    ).textContent =
+        "Última modificación: " +
+        formatoUltimoCambio(
+            data.ultima_modificacion,
+            data.modificado_por
+        );
 
 
     if (puedeVerCostos()) {
