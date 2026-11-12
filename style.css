@@ -4740,3 +4740,40 @@ td.cambio-antiguo {
 
     color: #8a8a90 !important;
 }
+
+/* ---- Escáner: recuadro guía y controles ---- */
+
+.escaner-visor {
+
+    position: relative;
+}
+
+.escaner-guia {
+
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    top: 30%;
+    bottom: 30%;
+    border: 2px solid rgba(76, 208, 138, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+}
+
+.escaner-guia::after {
+
+    content: "";
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    top: 50%;
+    height: 2px;
+    background: rgba(239, 107, 99, 0.85);
+}
+
+#escaner-linterna.activo {
+
+    background: #e0b43a;
+    color: #111;
+}

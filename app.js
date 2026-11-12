@@ -1883,8 +1883,14 @@ async function abrirEscaner(alLeer) {
 
     try {
 
+        // Resolución alta: los códigos de las botellas son chicos y la
+        // cámara por defecto (640x480) no los alcanza a leer bien.
         sesion.stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: { ideal: "environment" } },
+            video: {
+                facingMode: { ideal: "environment" },
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
             audio: false
         });
 
@@ -1899,7 +1905,10 @@ async function abrirEscaner(alLeer) {
 
         await video.play();
 
-        estado.textContent = "Apunta la cámara al código de barras";
+        estado.textContent =
+            "Pon el código dentro del recuadro, a unos 15-20 cm, con buena luz";
+
+        configurarControlesCamara(sesion);
 
         if ("BarcodeDetector" in window) {
 
@@ -1927,7 +1936,7 @@ async function abrirEscaner(alLeer) {
 
                 } catch (err) { /* se sigue intentando */ }
 
-                setTimeout(ciclo, 250);
+                setTimeout(ciclo, 90);
             };
 
             ciclo();
@@ -1940,7 +1949,27 @@ async function abrirEscaner(alLeer) {
             "https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/+esm"
         );
 
-        const lector = new zxing.BrowserMultiFormatReader();
+        const zxingLib = await import(
+            "https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/+esm"
+        );
+
+        // Solo formatos de productos y "esfuérzate más": mucho más rápido y preciso
+        const hints = new Map();
+
+        hints.set(zxingLib.DecodeHintType.POSSIBLE_FORMATS, [
+            zxingLib.BarcodeFormat.EAN_13,
+            zxingLib.BarcodeFormat.EAN_8,
+            zxingLib.BarcodeFormat.UPC_A,
+            zxingLib.BarcodeFormat.UPC_E,
+            zxingLib.BarcodeFormat.CODE_128,
+            zxingLib.BarcodeFormat.CODE_39
+        ]);
+
+        hints.set(zxingLib.DecodeHintType.TRY_HARDER, true);
+
+        const lector = new zxing.BrowserMultiFormatReader(hints, {
+            delayBetweenScanAttempts: 80
+        });
 
         sesion.control = await lector.decodeFromVideoElement(
             video,
@@ -1958,6 +1987,84 @@ async function abrirEscaner(alLeer) {
             "No se pudo usar la cámara. Revisa el permiso del navegador.";
     }
 }
+
+// Enfoque continuo, linterna y zoom cuando la cámara los permite
+function configurarControlesCamara(sesion) {
+
+    const btnLinterna = document.getElementById("escaner-linterna");
+
+    const btnZoom = document.getElementById("escaner-zoom");
+
+    if (btnLinterna) btnLinterna.hidden = true;
+
+    if (btnZoom) btnZoom.hidden = true;
+
+    const pista = sesion.stream.getVideoTracks()[0];
+
+    if (!pista || !pista.getCapabilities) return;
+
+    const cap = pista.getCapabilities();
+
+    function aplicar(avanzado) {
+
+        return pista
+            .applyConstraints({ advanced: [avanzado] })
+            .catch(function() { /* no soportado */ });
+    }
+
+    if (cap.focusMode && cap.focusMode.indexOf("continuous") !== -1) {
+
+        aplicar({ focusMode: "continuous" });
+    }
+
+    if (cap.torch && btnLinterna) {
+
+        let encendida = false;
+
+        btnLinterna.hidden = false;
+
+        btnLinterna.textContent = "Linterna";
+
+        btnLinterna.onclick = function() {
+
+            encendida = !encendida;
+
+            aplicar({ torch: encendida });
+
+            btnLinterna.classList.toggle("activo", encendida);
+        };
+    }
+
+    if (cap.zoom && btnZoom) {
+
+        const min = cap.zoom.min || 1;
+
+        const max = cap.zoom.max || 1;
+
+        const niveles = [min, Math.min(max, min * 2), Math.min(max, min * 3)]
+            .filter(function(v, i, a) { return a.indexOf(v) === i; });
+
+        if (niveles.length > 1) {
+
+            let i = 0;
+
+            btnZoom.hidden = false;
+
+            btnZoom.textContent = "Zoom x1";
+
+            btnZoom.onclick = function() {
+
+                i = (i + 1) % niveles.length;
+
+                aplicar({ zoom: niveles[i] });
+
+                btnZoom.textContent =
+                    "Zoom x" + Math.round(niveles[i] / min);
+            };
+        }
+    }
+}
+
 
 function cerrarEscaner() {
 
