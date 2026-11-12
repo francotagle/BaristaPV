@@ -1303,7 +1303,7 @@ if (productoForm) {
 let versionTablaProductos = 0;
 
 
-// "10/11 15:30 · Franco" (o "—" si nunca se ha modificado)
+// "10/11 15:30" (o "—" si nunca se ha modificado)
 function formatoUltimoCambio(fecha, correo) {
 
     if (!fecha) return "—";
@@ -1320,9 +1320,23 @@ function formatoUltimoCambio(fecha, correo) {
         hour12: false
     });
 
-    return correo
-        ? texto.replace(", ", " ") + " · " + nombreDesdeCorreo(correo)
-        : texto.replace(", ", " ");
+    return texto.replace(", ", " ");
+}
+
+
+// Verde si se modificó en las últimas 24 horas; gris si no.
+function claseUltimoCambio(fecha) {
+
+    const d = fecha ? new Date(fecha) : null;
+
+    if (
+        d && !isNaN(d.getTime()) &&
+        Date.now() - d.getTime() < 24 * 60 * 60 * 1000
+    ) {
+        return "cambio-reciente";
+    }
+
+    return "cambio-antiguo";
 }
 
 
@@ -1466,6 +1480,9 @@ async function cargarProductos() {
 
         fila.dataset.cambio = cambioTexto;
 
+        const cambioClase =
+            claseUltimoCambio(producto.ultima_modificacion);
+
 
         const costoProducto = costos[producto.id];
 
@@ -1520,7 +1537,7 @@ async function cargarProductos() {
                 <strong>
                     ${producto.nombre}
                 </strong>
-                <span class="ultimo-cambio-movil">
+                <span class="ultimo-cambio-movil ${cambioClase}">
                     Últ. cambio: ${cambioTexto}
                 </span>
             </td>
@@ -1553,7 +1570,7 @@ async function cargarProductos() {
                 ${ventaTexto}
             </td>
 
-            <td class="celda-ultimo-cambio">
+            <td class="celda-ultimo-cambio ${cambioClase}">
                 ${cambioTexto}
             </td>
 
@@ -2167,14 +2184,16 @@ async function editarProducto(id) {
     ).value = data.codigo_barras || "";
 
 
-    document.getElementById(
-        "producto-ultimo-cambio"
-    ).textContent =
+    const avisoCambio =
+        document.getElementById("producto-ultimo-cambio");
+
+    avisoCambio.textContent =
         "Última modificación: " +
-        formatoUltimoCambio(
-            data.ultima_modificacion,
-            data.modificado_por
-        );
+        formatoUltimoCambio(data.ultima_modificacion);
+
+    avisoCambio.className =
+        "ultimo-cambio-modal " +
+        claseUltimoCambio(data.ultima_modificacion);
 
 
     if (puedeVerCostos()) {

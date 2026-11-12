@@ -4725,3 +4725,18 @@ body.bar-babilonia #badge-86 {
         display: block;
     }
 }
+
+/* ---- Color de la última modificación: verde = últimas 24 h, gris = más antiguo ---- */
+
+.cambio-reciente,
+td.cambio-reciente {
+
+    color: #4cd08a !important;
+    font-weight: 600;
+}
+
+.cambio-antiguo,
+td.cambio-antiguo {
+
+    color: #8a8a90 !important;
+}

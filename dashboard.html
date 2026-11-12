@@ -2322,6 +2322,10 @@
                     document.getElementById('detalle-cambio').textContent =
                         fila.dataset.cambio || '—';
 
+                    document.getElementById('detalle-cambio').className =
+                        fila.querySelector('.ultimo-cambio-movil').classList.contains('cambio-reciente')
+                            ? 'cambio-reciente' : 'cambio-antiguo';
+
                     var celdaAcciones = celdas[celdas.length - 1];
 
                     var circuloPrioridad =
