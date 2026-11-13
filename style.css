@@ -4706,7 +4706,8 @@ body.bar-babilonia #badge-86 {
 
 #modal-escaner {
 
-    z-index: 600;
+    /* Por encima de cualquier otra ventana (las ventanas normales usan 1000) */
+    z-index: 2000;
 }
 
 .escaner-video {
