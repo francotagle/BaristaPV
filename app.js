@@ -2183,6 +2183,9 @@ document.addEventListener("DOMContentLoaded", function() {
 // Cambios de stock hechos con − y + que aún no se guardan: { idProducto: nuevoValor }
 const cambiosStockMovil = {};
 
+// Lo que suman o restan los botones − y + de cada tarjeta
+const PASO_STOCK_MOVIL = 0.1;
+
 function estadoStockMovil(stock, minimo) {
 
     if (stock <= 0) return { clase: "agotado", texto: "AGOTADO" };
@@ -2330,9 +2333,65 @@ function crearTarjetaProductoMovil(producto, categoria, cambioTexto, cambioClase
         actualizarBarraGuardarMovil();
     }
 
-    menos.addEventListener("click", function() { cambiar(-1); });
+    // Cada toque suma o resta 0,1. Si se deja apretado, repite y acelera.
+    function conRepeticion(boton, delta) {
 
-    mas.addEventListener("click", function() { cambiar(1); });
+        let espera = null;
+
+        let repetir = null;
+
+        let veces = 0;
+
+        function parar() {
+
+            clearTimeout(espera);
+
+            clearInterval(repetir);
+
+            espera = null;
+
+            repetir = null;
+        }
+
+        boton.addEventListener("pointerdown", function(e) {
+
+            if (e.button !== undefined && e.button !== 0) return;
+
+            parar();
+
+            veces = 0;
+
+            cambiar(delta);
+
+            espera = setTimeout(function() {
+
+                repetir = setInterval(function() {
+
+                    veces++;
+
+                    // Después de un rato avanza de a 1 para llegar rápido
+                    cambiar(veces > 12 ? delta * 10 : delta);
+
+                }, 110);
+
+            }, 450);
+        });
+
+        ["pointerup", "pointerleave", "pointercancel"].forEach(function(ev) {
+
+            boton.addEventListener(ev, parar);
+        });
+
+        // Teclado (Enter o espacio): el clic sin puntero
+        boton.addEventListener("click", function(e) {
+
+            if (e.detail === 0) cambiar(delta);
+        });
+    }
+
+    conRepeticion(menos, -PASO_STOCK_MOVIL);
+
+    conRepeticion(mas, PASO_STOCK_MOVIL);
 
     // Tocar el número abre el producto para escribir una cantidad exacta
     centro.addEventListener("click", function() {

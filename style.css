@@ -5304,3 +5304,24 @@ td.cambio-antiguo {
     }
 
 }
+
+@media (max-width: 700px) {
+
+    /* El menú "Más" queda libre: la barra inferior se esconde mientras está abierto
+       y el botón de cerrar sesión no queda tapado */
+
+    body:has(.sidebar.menu-open) .tabbar-movil {
+        display: none;
+    }
+
+    .sidebar-menu {
+        overflow-y: auto;
+        padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    }
+
+    .pm-paso {
+        touch-action: manipulation;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+}
