@@ -562,6 +562,14 @@ async function iniciarPermisos(usuario) {
 
     aplicarPermisos();
 
+    actualizarSaludoMovil(usuario);
+
+    actualizarAccionesMovil();
+
+    marcarTabActiva();
+
+    refrescarPizarrasInicio();
+
     document.body.classList.remove("cargando-rol");
 
     // La carga inicial se hizo antes de saber el cargo: se repite
@@ -1428,6 +1436,11 @@ async function cargarProductos() {
 
     tabla.innerHTML = "";
 
+    const contenedorMovil =
+        document.getElementById("productos-movil");
+
+    if (contenedorMovil) contenedorMovil.innerHTML = "";
+
 
     data.forEach(function(producto) {
 
@@ -1482,6 +1495,18 @@ async function cargarProductos() {
 
         const cambioClase =
             claseUltimoCambio(producto.ultima_modificacion);
+
+        if (contenedorMovil) {
+
+            contenedorMovil.appendChild(
+                crearTarjetaProductoMovil(
+                    producto,
+                    categoria,
+                    cambioTexto,
+                    cambioClase
+                )
+            );
+        }
 
 
         const costoProducto = costos[producto.id];
@@ -1586,6 +1611,12 @@ async function cargarProductos() {
         tabla.appendChild(fila);
 
     });
+
+    prepararChipsMovil(data);
+
+    filtrarTarjetasMovil();
+
+    actualizarBarraGuardarMovil();
 }
 
 
@@ -2142,6 +2173,589 @@ document.addEventListener("DOMContentLoaded", function() {
         if (el) el.addEventListener("click", cerrarEscaner);
     });
 });
+
+
+// ========================================
+// MÓVIL PRIMERO (teléfono): barra inferior, inicio con atajos,
+// tarjetas de producto con − y +, y guardado de varios cambios
+// ========================================
+
+// Cambios de stock hechos con − y + que aún no se guardan: { idProducto: nuevoValor }
+const cambiosStockMovil = {};
+
+function estadoStockMovil(stock, minimo) {
+
+    if (stock <= 0) return { clase: "agotado", texto: "AGOTADO" };
+
+    if (stock <= minimo) return { clase: "bajo", texto: "BAJO" };
+
+    return { clase: "ok", texto: "OK" };
+}
+
+
+function redondearStock(n) {
+
+    return Math.round(n * 100) / 100;
+}
+
+
+function crearTarjetaProductoMovil(producto, categoria, cambioTexto, cambioClase) {
+
+    const id = String(producto.id);
+
+    const original = Number(producto.stock_actual) || 0;
+
+    const minimo = Number(producto.stock_minimo) || 0;
+
+    const valor =
+        cambiosStockMovil[id] !== undefined
+            ? cambiosStockMovil[id]
+            : original;
+
+    const tarjeta = document.createElement("div");
+
+    tarjeta.className = "pm-card";
+
+    tarjeta.dataset.id = id;
+
+    tarjeta.dataset.original = String(original);
+
+    tarjeta.dataset.minimo = String(minimo);
+
+    tarjeta.dataset.categoria = categoria;
+
+    tarjeta.dataset.texto =
+        (
+            producto.nombre + " " +
+            categoria + " " +
+            (producto.codigo_barras || "")
+        ).toLowerCase();
+
+    function el(tag, clase, texto) {
+
+        const e = document.createElement(tag);
+
+        if (clase) e.className = clase;
+
+        if (texto !== undefined) e.textContent = texto;
+
+        return e;
+    }
+
+    const arriba = el("div", "pm-arriba");
+
+    const info = el("div", "pm-info");
+
+    info.appendChild(el("strong", "pm-nombre", producto.nombre));
+
+    info.appendChild(
+        el("span", "pm-cambio " + cambioClase, "Últ. cambio: " + cambioTexto)
+    );
+
+    arriba.appendChild(info);
+
+    arriba.appendChild(el("span", "pm-pill", ""));
+
+    tarjeta.appendChild(arriba);
+
+    const fila = el("div", "pm-fila");
+
+    const menos = el("button", "pm-paso pm-menos", "−");
+
+    menos.type = "button";
+
+    menos.setAttribute("aria-label", "Quitar uno a " + producto.nombre);
+
+    const centro = el("button", "pm-valor");
+
+    centro.type = "button";
+
+    centro.setAttribute("aria-label", "Editar " + producto.nombre);
+
+    centro.appendChild(el("strong", "pm-numero", ""));
+
+    centro.appendChild(el("span", "pm-unidad", producto.unidad || ""));
+
+    const mas = el("button", "pm-paso pm-mas", "+");
+
+    mas.type = "button";
+
+    mas.setAttribute("aria-label", "Sumar uno a " + producto.nombre);
+
+    fila.appendChild(menos);
+
+    fila.appendChild(centro);
+
+    fila.appendChild(mas);
+
+    tarjeta.appendChild(fila);
+
+    function pintar(v) {
+
+        const est = estadoStockMovil(v, minimo);
+
+        tarjeta.querySelector(".pm-numero").textContent = String(redondearStock(v));
+
+        const pill = tarjeta.querySelector(".pm-pill");
+
+        pill.textContent = est.texto;
+
+        pill.className = "pm-pill pm-pill-" + est.clase;
+
+        tarjeta.className =
+            "pm-card pm-" + est.clase +
+            (v !== original ? " pm-cambiado" : "");
+    }
+
+    function cambiar(delta) {
+
+        const actual =
+            cambiosStockMovil[id] !== undefined
+                ? cambiosStockMovil[id]
+                : original;
+
+        const nuevo = Math.max(0, redondearStock(actual + delta));
+
+        if (nuevo === original) {
+
+            delete cambiosStockMovil[id];
+
+        } else {
+
+            cambiosStockMovil[id] = nuevo;
+        }
+
+        pintar(nuevo);
+
+        actualizarBarraGuardarMovil();
+    }
+
+    menos.addEventListener("click", function() { cambiar(-1); });
+
+    mas.addEventListener("click", function() { cambiar(1); });
+
+    // Tocar el número abre el producto para escribir una cantidad exacta
+    centro.addEventListener("click", function() {
+
+        editarProducto(producto.id);
+    });
+
+    pintar(valor);
+
+    return tarjeta;
+}
+
+
+function actualizarBarraGuardarMovil() {
+
+    const barra = document.getElementById("pm-guardar");
+
+    const boton = document.getElementById("pm-guardar-btn");
+
+    if (!barra || !boton) return;
+
+    const n = Object.keys(cambiosStockMovil).length;
+
+    barra.hidden = n === 0;
+
+    boton.textContent =
+        n === 1 ? "Guardar 1 cambio" : "Guardar " + n + " cambios";
+
+    boton.disabled = false;
+}
+
+
+async function guardarCambiosStockMovil() {
+
+    const boton = document.getElementById("pm-guardar-btn");
+
+    const ids = Object.keys(cambiosStockMovil);
+
+    if (ids.length === 0) return;
+
+    boton.disabled = true;
+
+    boton.textContent = "Guardando...";
+
+    let fallos = 0;
+
+    for (const id of ids) {
+
+        const { error } = await supabaseClient
+            .from("productos")
+            .update({ stock_actual: cambiosStockMovil[id] })
+            .eq("id", id);
+
+        if (error) {
+
+            console.error("Error guardando stock:", error);
+
+            fallos++;
+
+        } else {
+
+            delete cambiosStockMovil[id];
+        }
+    }
+
+    await cargarProductos();
+
+    actualizarResumen();
+
+    if (fallos > 0) {
+
+        alert("No se pudieron guardar " + fallos + " cambio(s). Inténtalo de nuevo.");
+    }
+}
+
+
+function descartarCambiosStockMovil() {
+
+    Object.keys(cambiosStockMovil).forEach(function(id) {
+
+        delete cambiosStockMovil[id];
+    });
+
+    cargarProductos();
+}
+
+
+function prepararChipsMovil(productos) {
+
+    const cont = document.getElementById("pm-chips");
+
+    if (!cont) return;
+
+    const nombres = [];
+
+    productos.forEach(function(p) {
+
+        const n = p.categorias ? p.categorias.nombre : "Sin categoría";
+
+        if (nombres.indexOf(n) === -1) nombres.push(n);
+    });
+
+    nombres.sort();
+
+    cont.innerHTML = "";
+
+    ["Todos"].concat(nombres).forEach(function(n) {
+
+        const chip = document.createElement("button");
+
+        chip.type = "button";
+
+        chip.className = "pm-chip";
+
+        chip.dataset.valor = n === "Todos" ? "" : n;
+
+        chip.textContent = n;
+
+        chip.addEventListener("click", function() {
+
+            const buscador = document.getElementById("buscar-producto");
+
+            if (!buscador) return;
+
+            buscador.value = chip.dataset.valor;
+
+            buscador.dispatchEvent(new Event("input"));
+        });
+
+        cont.appendChild(chip);
+    });
+}
+
+
+function filtrarTarjetasMovil() {
+
+    const buscador = document.getElementById("buscar-producto");
+
+    const texto = buscador ? buscador.value.trim().toLowerCase() : "";
+
+    document.querySelectorAll("#productos-movil .pm-card").forEach(function(t) {
+
+        t.style.display =
+            !texto || t.dataset.texto.indexOf(texto) !== -1 ? "" : "none";
+    });
+
+    document.querySelectorAll("#pm-chips .pm-chip").forEach(function(c) {
+
+        c.classList.toggle(
+            "activo",
+            c.dataset.valor.toLowerCase() === texto
+        );
+    });
+}
+
+
+function nombrePila(correo) {
+
+    const base = String(correo || "").split("@")[0].split(/[._-]/)[0];
+
+    return base ? base.charAt(0).toUpperCase() + base.slice(1) : "";
+}
+
+
+function actualizarSaludoMovil(usuario) {
+
+    const hola = document.getElementById("im-hola");
+
+    const sub = document.getElementById("im-sub");
+
+    const chip = document.getElementById("im-bar");
+
+    const babilonia = barActual() === "babilonia";
+
+    if (hola) hola.textContent = "Hola, " + (nombrePila(usuario && usuario.email) || "equipo");
+
+    const rol = document.querySelector(".encargado");
+
+    if (sub) sub.textContent = rol ? rol.textContent : "";
+
+    if (!chip) return;
+
+    const puedeCambiar = rolUsuario === "master" || rolUsuario === "admin";
+
+    chip.textContent = (babilonia ? "Babilonia" : "Barista") + (puedeCambiar ? " ▾" : "");
+
+    chip.disabled = !puedeCambiar;
+
+    if (puedeCambiar) {
+
+        chip.onclick = function() {
+
+            try {
+
+                localStorage.setItem("bar", babilonia ? "barista" : "babilonia");
+
+            } catch (e) { /* sin almacenamiento */ }
+
+            window.location.reload();
+        };
+    }
+}
+
+
+// Muestra solo los atajos que el cargo puede usar
+function actualizarAccionesMovil() {
+
+    const mapa = { escanear: null, entradas: "entradas", recetario: "recetario", reportes: "reportes" };
+
+    document.querySelectorAll(".im-accion").forEach(function(b) {
+
+        const seccion = mapa[b.dataset.ir];
+
+        if (!seccion) return;
+
+        const item = document.querySelector('.menu-item[data-section="' + seccion + '"]');
+
+        b.style.display =
+            item && item.style.display === "none" ? "none" : "";
+    });
+
+    document.querySelectorAll(".tab-movil[data-section-menu]").forEach(function(t) {
+
+        const item = document.querySelector(
+            '.menu-item[data-section="' + t.dataset.sectionMenu + '"]'
+        );
+
+        t.style.display =
+            item && item.style.display === "none" ? "none" : "";
+    });
+}
+
+
+function marcarTabActiva() {
+
+    const activo = document.querySelector(".menu-item.active");
+
+    const seccion = activo ? activo.dataset.section : "inicio";
+
+    document.body.classList.toggle("seccion-inicio", seccion === "inicio");
+
+    document.querySelectorAll(".tab-movil").forEach(function(t) {
+
+        const propia = t.dataset.sectionMenu;
+
+        t.classList.toggle(
+            "activo",
+            propia ? propia === seccion : (t.dataset.tab === "mas" && !["inicio", "productos"].includes(seccion))
+        );
+    });
+}
+
+
+let temporizadorPizarras = null;
+
+function refrescarPizarrasInicio() {
+
+    clearTimeout(temporizadorPizarras);
+
+    temporizadorPizarras = setTimeout(async function() {
+
+        const destinos = [
+            { tabla: "ochenta_y_seis", id: "im-lista-86" },
+            { tabla: "ciento_uno", id: "im-lista-101" }
+        ];
+
+        for (const d of destinos) {
+
+            const caja = document.getElementById(d.id);
+
+            if (!caja) continue;
+
+            const { data, error } = await supabaseClient
+                .from(d.tabla)
+                .select("nombre")
+                .order("created_at", { ascending: false })
+                .limit(50);
+
+            if (error || !data) {
+
+                caja.textContent = "—";
+
+                continue;
+            }
+
+            if (data.length === 0) {
+
+                caja.textContent = "Nada por ahora";
+
+                continue;
+            }
+
+            caja.innerHTML = "";
+
+            data.slice(0, 2).forEach(function(r) {
+
+                const l = document.createElement("span");
+
+                l.textContent = r.nombre;
+
+                caja.appendChild(l);
+            });
+
+            if (data.length > 2) {
+
+                const mas = document.createElement("span");
+
+                mas.className = "im-mas";
+
+                mas.textContent = "+" + (data.length - 2) + " más";
+
+                caja.appendChild(mas);
+            }
+        }
+
+    }, 400);
+}
+
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    // Barra inferior
+    document.querySelectorAll(".tab-movil").forEach(function(t) {
+
+        t.addEventListener("click", function() {
+
+            const tab = t.dataset.tab;
+
+            if (tab === "inicio" || tab === "productos") {
+
+                abrirSeccion(tab);
+
+            } else if (tab === "recetario") {
+
+                const item = document.querySelector('.menu-item[data-section="recetario"]');
+
+                if (item) item.click();
+
+            } else if (tab === "mas") {
+
+                const b = document.getElementById("menu-toggle");
+
+                if (b) b.click();
+
+            } else if (tab === "escanear") {
+
+                escanearDesdeCualquierLado();
+            }
+
+            setTimeout(marcarTabActiva, 80);
+        });
+    });
+
+    // Cualquier cambio de sección (menú, atajos) actualiza la barra
+    document.addEventListener("click", function() {
+
+        setTimeout(marcarTabActiva, 120);
+    });
+
+    // Atajos del inicio
+    document.querySelectorAll(".im-accion").forEach(function(b) {
+
+        b.addEventListener("click", function() {
+
+            const ir = b.dataset.ir;
+
+            if (ir === "escanear") {
+
+                escanearDesdeCualquierLado();
+
+                return;
+            }
+
+            const item = document.querySelector('.menu-item[data-section="' + ir + '"]');
+
+            if (item) item.click();
+        });
+    });
+
+    // Tarjetas 86 y 101 del inicio abren su pizarra
+    [["im-pz-86", "p86-boton"], ["im-pz-101", "p101-boton"]].forEach(function(par) {
+
+        const tarjeta = document.getElementById(par[0]);
+
+        if (!tarjeta) return;
+
+        tarjeta.addEventListener("click", function() {
+
+            const boton = document.getElementById(par[1]);
+
+            if (boton) boton.click();
+        });
+    });
+
+    // Productos: filtro de tarjetas y guardado
+    const buscador = document.getElementById("buscar-producto");
+
+    if (buscador) buscador.addEventListener("input", filtrarTarjetasMovil);
+
+    const guardar = document.getElementById("pm-guardar-btn");
+
+    if (guardar) guardar.addEventListener("click", guardarCambiosStockMovil);
+
+    const descartar = document.getElementById("pm-descartar");
+
+    if (descartar) descartar.addEventListener("click", descartarCambiosStockMovil);
+
+    marcarTabActiva();
+});
+
+
+// Abre la cámara y, al leer un código, va al producto para cambiar su stock
+function escanearDesdeCualquierLado() {
+
+    abrirEscaner(async function(codigo) {
+
+        abrirSeccion("productos");
+
+        await cargarProductos();
+
+        abrirProductoPorCodigo(codigo);
+    });
+}
 
 
 // ========================================
@@ -4331,6 +4945,8 @@ const badge86 =
 
 function actualizarBadge86(cantidad) {
 
+    refrescarPizarrasInicio();
+
     if (!badge86) return;
 
     badge86.textContent = cantidad;
@@ -4543,6 +5159,8 @@ const badge101 =
 
 
 function actualizarBadge101(cantidad) {
+
+    refrescarPizarrasInicio();
 
     if (!badge101) return;
 

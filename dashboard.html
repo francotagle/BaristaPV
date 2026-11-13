@@ -230,6 +230,47 @@
             >
 
 
+                <!-- MÓVIL PRIMERO: saludo, atajos y pizarras (solo teléfono) -->
+
+                <div class="im-saludo" id="im-saludo">
+                    <div class="im-saludo-texto">
+                        <span class="im-sub" id="im-sub">El Barista Caffè</span>
+                        <strong class="im-hola" id="im-hola">Hola</strong>
+                    </div>
+                    <button type="button" class="im-chip" id="im-bar"></button>
+                </div>
+
+                <div class="im-acciones" id="im-acciones">
+                    <button type="button" class="im-accion im-accion-principal" data-ir="escanear">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M20 7V5a1 1 0 0 0-1-1h-2M4 17v2a1 1 0 0 0 1 1h2M20 17v2a1 1 0 0 1-1 1h-2M8 8v8M12 8v8M16 8v8"/></svg>
+                        <span>Escanear</span>
+                    </button>
+                    <button type="button" class="im-accion" data-ir="entradas">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>
+                        <span>Registrar ingreso</span>
+                    </button>
+                    <button type="button" class="im-accion" data-ir="recetario">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM8 20a3 3 0 0 1-3-3"/></svg>
+                        <span>Recetario</span>
+                    </button>
+                    <button type="button" class="im-accion" data-ir="reportes">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+                        <span>Reportes</span>
+                    </button>
+                </div>
+
+                <div class="im-pizarras" id="im-pizarras">
+                    <button type="button" class="im-pz im-pz-86" id="im-pz-86">
+                        <span class="im-pz-cab"><strong>86</strong><span>se acabó</span></span>
+                        <span class="im-pz-lista" id="im-lista-86">Cargando…</span>
+                    </button>
+                    <button type="button" class="im-pz im-pz-101" id="im-pz-101">
+                        <span class="im-pz-cab"><strong>101</strong><span>a vender</span></span>
+                        <span class="im-pz-lista" id="im-lista-101">Cargando…</span>
+                    </button>
+                </div>
+
+
                 <div class="dashboard-header">
 
                     <h1>
@@ -468,6 +509,18 @@
 
                 </div>
 
+
+
+                <!-- MÓVIL PRIMERO: categorías, tarjetas y guardado (solo teléfono) -->
+
+                <div class="pm-chips" id="pm-chips"></div>
+
+                <div class="productos-movil" id="productos-movil"></div>
+
+                <div class="pm-guardar" id="pm-guardar" hidden>
+                    <button type="button" class="pm-guardar-btn" id="pm-guardar-btn">Guardar cambios</button>
+                    <button type="button" class="pm-descartar" id="pm-descartar">Descartar</button>
+                </div>
 
 
                 <!-- TABLA -->
@@ -1729,6 +1782,32 @@
 
     </div>
 
+
+
+    <!-- BARRA INFERIOR (solo teléfono) -->
+
+    <nav class="tabbar-movil" id="tabbar-movil" aria-label="Navegación principal">
+        <button type="button" class="tab-movil" data-tab="inicio" data-section-menu="inicio">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>
+            <span>Inicio</span>
+        </button>
+        <button type="button" class="tab-movil" data-tab="productos" data-section-menu="productos">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7l8-4 8 4v10l-8 4-8-4zM4 7l8 4 8-4M12 11v10"/></svg>
+            <span>Productos</span>
+        </button>
+        <button type="button" class="tab-movil tab-escanear" data-tab="escanear">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M20 7V5a1 1 0 0 0-1-1h-2M4 17v2a1 1 0 0 0 1 1h2M20 17v2a1 1 0 0 1-1 1h-2M8 8v8M12 8v8M16 8v8"/></svg>
+            <span>Escanear</span>
+        </button>
+        <button type="button" class="tab-movil" data-tab="recetario" data-section-menu="recetario">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM8 20a3 3 0 0 1-3-3"/></svg>
+            <span>Recetario</span>
+        </button>
+        <button type="button" class="tab-movil" data-tab="mas">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg>
+            <span>Más</span>
+        </button>
+    </nav>
 
 
     <!-- ESCÁNER DE CÓDIGO DE BARRAS (cámara) -->
